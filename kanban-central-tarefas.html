@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Central de Tarefas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "tertiary-fixed": "#ffdbc8",
+          "surface-container-high": "#e9e8e7",
+          "inverse-primary": "#a3c9ff",
+          "inverse-surface": "#2f3130",
+          "on-tertiary-container": "#ffffff",
+          "on-primary-fixed": "#001c39",
+          "inverse-on-surface": "#f1f0ef",
+          "surface-tint": "#0060ab",
+          "on-secondary-container": "#405b7f",
+          "tertiary": "#974700",
+          "tertiary-container": "#bc5b00",
+          "primary-fixed": "#d3e3ff",
+          "on-surface-variant": "#404752",
+          "primary-container": "#0078d4",
+          "on-tertiary-fixed-variant": "#743500",
+          "on-background": "#1a1c1c",
+          "surface-bright": "#faf9f8",
+          "outline": "#717783",
+          "on-secondary-fixed": "#001c39",
+          "error": "#ba1a1a",
+          "outline-variant": "#c0c7d4",
+          "secondary": "#456084",
+          "on-surface": "#1a1c1c",
+          "on-primary-container": "#ffffff",
+          "on-tertiary": "#ffffff",
+          "primary-fixed-dim": "#a3c9ff",
+          "on-secondary": "#ffffff",
+          "surface-container-highest": "#e3e2e1",
+          "on-error": "#ffffff",
+          "surface-dim": "#dadad9",
+          "on-error-container": "#93000a",
+          "primary": "#005faa",
+          "surface-variant": "#e3e2e1",
+          "background": "#faf9f8",
+          "on-primary-fixed-variant": "#004883",
+          "on-tertiary-fixed": "#311300",
+          "surface-container": "#efeeed",
+          "secondary-container": "#b8d3fd",
+          "secondary-fixed-dim": "#adc8f2",
+          "surface-container-low": "#f4f3f2",
+          "error-container": "#ffdad6",
+          "surface": "#faf9f8",
+          "surface-container-lowest": "#ffffff",
+          "on-primary": "#ffffff",
+          "secondary-fixed": "#d3e3ff",
+          "tertiary-fixed-dim": "#ffb689",
+          "on-secondary-fixed-variant": "#2d486b"
+        },
+        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+        borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+      }
+    }
+  }
+</script>
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #f4f3f2; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c0c7d4; border-radius: 10px; }
+
+/* ── NAV ── */
+.nav-tab.active { color: #005faa; background: rgba(0,120,212,0.10); border-radius: 12px; }
+.nav-tab { color: rgba(26,28,28,0.55); transition: color .2s, transform .15s; }
+.nav-tab:active { transform: scale(0.9); }
+
+/* ── KANBAN BOARD ── */
+#board-scroll { display: flex; gap: 20px; padding: 0 24px 80px; overflow-x: auto; min-height: calc(100vh - 160px); align-items: flex-start; }
+.kanban-col { min-width: 280px; width: 280px; background: #efeeed; border-radius: 14px; display: flex; flex-direction: column; flex-shrink: 0; }
+.col-header { padding: 16px 16px 12px; display: flex; align-items: center; justify-content: space-between; }
+.col-title { font-weight: 700; font-size: 13px; color: #1a1c1c; }
+.col-count { background: #c0c7d4; color: #404752; border-radius: 999px; padding: 1px 8px; font-size: 12px; font-weight: 600; min-width: 24px; text-align: center; }
+.col-cards { padding: 4px 10px 10px; flex: 1; min-height: 60px; transition: background .2s; display: flex; flex-direction: column; gap: 10px; }
+.col-cards.drag-over { background: rgba(0,95,170,0.06); border-radius: 10px; }
+
+/* ── TASK CARD ── */
+.task-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  cursor: grab;
+  position: relative;
+  transition: box-shadow .2s, transform .15s;
+  user-select: none;
+}
+.task-card:hover { box-shadow: 0 6px 20px rgba(26,28,28,0.10); }
+.task-card.dragging { opacity: 0; pointer-events: none; }
+.task-card.drag-ghost { box-shadow: 0 20px 40px rgba(26,28,28,0.14); transform: rotate(2deg) scale(1.03); cursor: grabbing; }
+.task-card .accent-strip { position: absolute; left: 0; top: 8px; bottom: 8px; width: 4px; border-radius: 4px; background: #bc5b00; }
+.task-card.priority-alta .accent-strip { background: #bc5b00; display: block; }
+.task-card.priority-normal .accent-strip { display: none; }
+.task-card.priority-baixa .accent-strip { display: none; }
+.card-chip { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: #adc8f2; color: #001c39; }
+.card-chip.alta { background: #ffdbc8; color: #743500; }
+.card-chip.interna { background: #d3e3ff; color: #004883; }
+.card-chip.pesquisa { background: #e3e2e1; color: #404752; }
+.card-title { font-size: 13px; font-weight: 600; color: #1a1c1c; margin: 8px 0 6px; line-height: 1.4; }
+.card-desc { font-size: 11px; color: #404752; line-height: 1.5; margin-bottom: 8px; }
+.card-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.card-date { font-size: 11px; color: #717783; display: flex; align-items: center; gap: 3px; }
+.avatar-stack { display: flex; }
+.avatar { width: 24px; height: 24px; border-radius: 999px; background: #b8d3fd; border: 2px solid #fff; color: #001c39; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-left: -6px; }
+.avatar:first-child { margin-left: 0; }
+
+/* ── ADD CARD BUTTON ── */
+.add-card-btn { width: 100%; padding: 10px; border: 2px dashed rgba(192,199,212,0.5); border-radius: 10px; color: #717783; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: border-color .2s, color .2s, background .15s; margin: 4px 0 0; }
+.add-card-btn:hover { border-color: rgba(0,95,170,0.4); color: #005faa; background: rgba(0,95,170,0.04); }
+
+/* ── HUB VIEW ── */
+.project-card { background: #fff; border-radius: 14px; padding: 20px; position: relative; overflow: hidden; cursor: pointer; transition: box-shadow .2s; }
+.project-card:hover { box-shadow: 0 8px 24px rgba(26,28,28,0.10); }
+.project-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.progress-bar { height: 5px; background: #efeeed; border-radius: 999px; overflow: hidden; margin: 10px 0 6px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #005faa, #0078d4); border-radius: 999px; transition: width .6s ease; }
+
+/* ── MODAL OVERLAY ── */
+#modal-overlay {
+  position: fixed; inset: 0; background: rgba(26,28,28,0.35);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  animation: fadeIn .18s ease;
+}
+#modal-overlay.open { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+#modal-box {
+  background: #fff; border-radius: 20px;
+  padding: 28px; width: 92%; max-width: 480px;
+  box-shadow: 0 24px 60px rgba(26,28,28,0.18);
+  animation: slideUp .22s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-label { font-size: 11px; font-weight: 700; color: #404752; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; display: block; }
+.modal-input { width: 100%; background: #f4f3f2; border: none; border-radius: 10px; padding: 11px 14px; font-size: 14px; color: #1a1c1c; font-family: 'Inter', sans-serif; outline: none; transition: background .15s, box-shadow .15s; }
+.modal-input:focus { background: #fff; box-shadow: 0 0 0 2px rgba(0,95,170,0.2); }
+.modal-select { appearance: none; cursor: pointer; }
+.btn-primary { background: linear-gradient(135deg, #005faa, #0078d4); color: #fff; font-weight: 600; font-size: 14px; border-radius: 12px; padding: 11px 24px; cursor: pointer; border: none; transition: opacity .15s, transform .1s; }
+.btn-primary:hover { opacity: 0.92; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-ghost { background: none; color: #005faa; font-weight: 600; font-size: 14px; border-radius: 12px; padding: 11px 20px; cursor: pointer; border: none; transition: background .15s; }
+.btn-ghost:hover { background: rgba(0,95,170,0.07); }
+.btn-danger { background: none; color: #ba1a1a; font-weight: 600; font-size: 14px; border-radius: 12px; padding: 11px 20px; cursor: pointer; border: none; transition: background .15s; }
+.btn-danger:hover { background: rgba(186,26,26,0.07); }
+
+/* ── DETAIL VIEW ── */
+#detail-view { position: fixed; inset: 0; z-index: 150; background: #f4f3f2; overflow-y: auto; display: none; animation: slideUp .22s ease; }
+#detail-view.open { display: block; }
+.detail-section { background: #fff; border-radius: 14px; padding: 20px; }
+.detail-label { font-size: 11px; font-weight: 700; color: #005faa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; display: block; }
+.checklist-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(244,243,242,0.6); border-radius: 10px; transition: background .15s; }
+.checklist-item:hover { background: #f4f3f2; }
+.checklist-item input[type=checkbox] { width: 18px; height: 18px; border-radius: 4px; accent-color: #005faa; cursor: pointer; }
+.checklist-item.done span { text-decoration: line-through; color: #717783; }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1c1c; color: #fff; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity .25s, transform .25s; z-index: 500; white-space: nowrap; pointer-events: none; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── ANIMATIONS ── */
+.task-card { animation: cardIn .2s ease; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.view { display: none; }
+.view.active { display: block; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ══════════════════════ TOP APP BAR ══════════════════════ -->
+<header style="background:rgba(250,249,248,0.92);backdrop-filter:blur(16px);" class="sticky top-0 z-50 flex justify-between items-center px-5 py-3 border-b border-[#c0c7d4]/20">
+  <div class="flex items-center gap-3">
+    <button id="back-btn" onclick="closeDetail()" class="hidden text-primary hover:bg-surface-container p-2 rounded-full transition-colors">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <span class="text-primary"><span class="material-symbols-outlined" style="font-size:22px;font-variation-settings:'FILL' 1">grid_view</span></span>
+    <h1 id="app-title" class="font-extrabold text-[17px] text-[#1a1c1c]">Central de Tarefas</h1>
+  </div>
+  <div class="flex items-center gap-3">
+    <button onclick="openSearch()" class="text-[#404752] hover:bg-surface-container p-2 rounded-full transition-colors">
+      <span class="material-symbols-outlined">search</span>
+    </button>
+    <div class="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed text-xs font-bold overflow-hidden">
+      <span style="font-size:11px;font-weight:700;color:#004883;">JC</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════ VIEWS ══════════════════════ -->
+
+<!-- ─── HUB VIEW ─── -->
+<div id="view-hub" class="view active px-5 py-6 pb-24">
+  <div class="flex justify-between items-start mb-6">
+    <div>
+      <h2 class="font-extrabold text-[22px] text-[#1a1c1c]">Meus Planos</h2>
+      <p class="text-[13px] text-[#404752] mt-0.5">Gerencie e acompanhe seus projetos ativos.</p>
+    </div>
+    <button onclick="openNewProjectModal()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary-container text-white font-semibold text-[13px] rounded-xl shadow-sm hover:opacity-90 active:scale-95 transition-all">
+      <span class="material-symbols-outlined text-[18px]">add</span> Novo Plano
+    </button>
+  </div>
+
+  <!-- Stats card -->
+  <div id="hub-stats" class="bg-white rounded-2xl p-5 mb-6 grid grid-cols-2 gap-4"></div>
+
+  <!-- Project list -->
+  <div id="project-list" class="space-y-4 mb-6"></div>
+
+  <!-- Add project -->
+  <button onclick="openNewProjectModal()" class="w-full bg-white/70 border-2 border-dashed border-[#c0c7d4]/50 rounded-2xl p-6 flex flex-col items-center gap-2 text-[#717783] hover:border-primary/40 hover:text-primary transition-all">
+    <span class="material-symbols-outlined text-3xl">add_circle</span>
+    <span class="font-semibold text-[13px]">Novo Projeto</span>
+    <span class="text-[12px]">Comece algo novo hoje</span>
+  </button>
+</div>
+
+<!-- ─── BOARD VIEW ─── -->
+<div id="view-board" class="view">
+  <div class="flex justify-between items-center px-5 py-4">
+    <div>
+      <div class="flex items-center gap-2 text-[#404752] text-[12px] font-medium mb-1">
+        <span class="material-symbols-outlined text-[16px]">folder</span>
+        <span id="board-project-label">Projeto</span>
+      </div>
+      <h2 id="board-project-name" class="font-extrabold text-[17px] text-[#1a1c1c]">Quadro Kanban</h2>
+    </div>
+    <button onclick="openNewTaskModal()" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-primary-container text-white font-semibold text-[13px] rounded-xl shadow-sm hover:opacity-90 active:scale-95 transition-all">
+      <span class="material-symbols-outlined text-[18px]">add</span> Nova Tarefa
+    </button>
+  </div>
+  <div id="board-scroll"></div>
+</div>
+
+<!-- ─── CALENDAR VIEW ─── -->
+<div id="view-calendar" class="view px-5 py-6 pb-24">
+  <h2 class="font-extrabold text-[22px] text-[#1a1c1c] mb-1">Calendário</h2>
+  <p id="cal-month-label" class="text-[13px] text-[#404752] mb-5"></p>
+  <div class="flex gap-2 mb-6">
+    <button onclick="setCalView('month')" id="cal-btn-month" class="px-4 py-2 rounded-xl text-[13px] font-semibold bg-surface-container-lowest border border-[#c0c7d4]/30 text-primary">Mês</button>
+    <button onclick="setCalView('week')" id="cal-btn-week" class="px-4 py-2 rounded-xl text-[13px] font-semibold bg-surface-container text-[#404752]">Semana</button>
+  </div>
+  <div id="cal-grid" class="bg-white rounded-2xl overflow-hidden mb-6"></div>
+  <h3 class="font-bold text-[15px] text-[#1a1c1c] mb-3">Próximas Tarefas</h3>
+  <div id="cal-upcoming" class="space-y-3"></div>
+</div>
+
+<!-- ─── TASKS VIEW ─── -->
+<div id="view-tasks" class="view px-5 py-6 pb-24">
+  <div class="flex justify-between items-center mb-5">
+    <h2 class="font-extrabold text-[22px] text-[#1a1c1c]">Tarefas</h2>
+    <button onclick="openNewTaskModal()" class="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-primary to-primary-container text-white text-[12px] font-semibold rounded-xl">
+      <span class="material-symbols-outlined text-[16px]">add</span> Nova
+    </button>
+  </div>
+  <div class="flex gap-2 mb-5 flex-wrap" id="task-filter-chips"></div>
+  <div id="task-list" class="space-y-3"></div>
+</div>
+
+<!-- ══════════════════════ DETAIL VIEW ══════════════════════ -->
+<div id="detail-view">
+  <div class="max-w-xl mx-auto px-5 py-6 pb-24">
+    <!-- Actions -->
+    <div class="flex justify-between items-center mb-6">
+      <button onclick="deleteCurrentTask()" class="flex items-center gap-1.5 px-4 py-2 text-error font-semibold text-[13px] hover:bg-error/5 rounded-xl transition-colors">
+        <span class="material-symbols-outlined text-[18px]">delete</span> Excluir
+      </button>
+      <button onclick="saveCurrentTask()" class="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-primary to-primary-container text-white font-semibold text-[13px] rounded-xl shadow-sm hover:opacity-90 active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-[18px]">save</span> Salvar
+      </button>
+    </div>
+    <!-- Content -->
+    <div class="space-y-5">
+      <!-- Title -->
+      <div class="detail-section">
+        <label class="detail-label">Nome da Tarefa</label>
+        <input id="d-title" type="text" class="w-full text-[20px] font-extrabold text-[#1a1c1c] bg-transparent border-none outline-none placeholder:text-[#c0c7d4]" placeholder="Título da tarefa..."/>
+      </div>
+      <!-- Status & Assignee -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="detail-section">
+          <label class="detail-label">Status</label>
+          <select id="d-status" class="w-full bg-transparent border-none outline-none font-semibold text-[13px] text-[#1a1c1c] cursor-pointer">
+            <option value="todo">A Fazer</option>
+            <option value="inprogress">Em Andamento</option>
+            <option value="review">Em Revisão</option>
+            <option value="done">Concluído</option>
+          </select>
+        </div>
+        <div class="detail-section">
+          <label class="detail-label">Prioridade</label>
+          <select id="d-priority" class="w-full bg-transparent border-none outline-none font-semibold text-[13px] text-[#1a1c1c] cursor-pointer">
+            <option value="normal">Normal</option>
+            <option value="alta">Alta</option>
+            <option value="baixa">Baixa</option>
+          </select>
+        </div>
+      </div>
+      <!-- Assignee -->
+      <div class="detail-section">
+        <label class="detail-label">Atribuído a</label>
+        <input id="d-assignee" type="text" class="modal-input" placeholder="Nome do responsável"/>
+      </div>
+      <!-- Tags -->
+      <div class="detail-section">
+        <label class="detail-label">Categoria</label>
+        <input id="d-tag" type="text" class="modal-input" placeholder="ex: Design, Dev, Marketing"/>
+      </div>
+      <!-- Description -->
+      <div class="detail-section">
+        <label class="detail-label" style="color:#404752">Notas e Descrição</label>
+        <textarea id="d-desc" class="w-full bg-[#f4f3f2] border-none rounded-xl p-3 text-[13px] text-[#404752] leading-relaxed outline-none focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all resize-none" rows="4" placeholder="Adicione uma descrição detalhada..."></textarea>
+      </div>
+      <!-- Checklist -->
+      <div class="detail-section">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[18px]">checklist</span>
+            <span class="font-bold text-[12px] text-[#1a1c1c] uppercase tracking-wider">Checklist</span>
+          </div>
+          <span id="checklist-counter" class="text-[12px] font-medium text-[#404752]"></span>
+        </div>
+        <div id="checklist-items" class="space-y-2"></div>
+        <button onclick="addChecklistItem()" class="w-full mt-4 py-2.5 border-2 border-dashed border-[#c0c7d4]/40 rounded-xl text-[#717783] text-[13px] font-medium flex items-center justify-center gap-2 hover:border-primary/40 hover:text-primary transition-all">
+          <span class="material-symbols-outlined text-[18px]">add</span> Adicionar item
+        </button>
+      </div>
+      <!-- Dates -->
+      <div class="detail-section space-y-4">
+        <div>
+          <label class="detail-label" style="color:#404752">Data de Início</label>
+          <div class="flex items-center gap-3 bg-[#f4f3f2] p-3 rounded-xl">
+            <span class="material-symbols-outlined text-[#404752] text-[18px]">calendar_today</span>
+            <input id="d-start" type="date" class="bg-transparent border-none outline-none text-[#1a1c1c] font-medium w-full text-[13px]"/>
+          </div>
+        </div>
+        <div>
+          <label class="detail-label" style="color:#404752">Data de Entrega</label>
+          <div class="flex items-center gap-3 bg-[#f4f3f2] p-3 rounded-xl">
+            <span class="material-symbols-outlined text-error text-[18px]">event_busy</span>
+            <input id="d-due" type="date" class="bg-transparent border-none outline-none text-[#1a1c1c] font-medium w-full text-[13px]"/>
+          </div>
+        </div>
+      </div>
+      <!-- Activity -->
+      <div class="detail-section">
+        <h3 class="font-bold text-[12px] text-[#1a1c1c] uppercase tracking-wider mb-4">Atividade Recente</h3>
+        <div id="d-activity" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ MODAL ══════════════════════ -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal-box" onclick="event.stopPropagation()">
+    <div class="flex justify-between items-center mb-5">
+      <h3 id="modal-title" class="font-extrabold text-[18px] text-[#1a1c1c]">Nova Tarefa</h3>
+      <button onclick="closeModal()" class="text-[#717783] hover:bg-[#f4f3f2] p-1.5 rounded-full transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ BOTTOM NAV ══════════════════════ -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-4 pt-2 z-50 rounded-t-2xl" style="background:rgba(255,255,255,0.88);backdrop-filter:blur(20px);border-top:1px solid rgba(192,199,212,0.2);box-shadow:0 -4px 20px rgba(26,28,28,0.06);">
+  <button onclick="switchView('hub')" class="nav-tab flex flex-col items-center px-3 py-1.5 gap-0.5 transition-colors" id="nav-hub">
+    <span class="material-symbols-outlined text-[24px]">dashboard</span>
+    <span class="text-[10px] font-semibold">Hub</span>
+  </button>
+  <button onclick="switchView('board')" class="nav-tab flex flex-col items-center px-3 py-1.5 gap-0.5 transition-colors" id="nav-board">
+    <span class="material-symbols-outlined text-[24px]">view_kanban</span>
+    <span class="text-[10px] font-semibold">Quadro</span>
+  </button>
+  <button onclick="switchView('calendar')" class="nav-tab flex flex-col items-center px-3 py-1.5 gap-0.5 transition-colors" id="nav-calendar">
+    <span class="material-symbols-outlined text-[24px]">calendar_month</span>
+    <span class="text-[10px] font-semibold">Calendário</span>
+  </button>
+  <button onclick="switchView('tasks')" class="nav-tab flex flex-col items-center px-3 py-1.5 gap-0.5 transition-colors" id="nav-tasks">
+    <span class="material-symbols-outlined text-[24px]">assignment</span>
+    <span class="text-[10px] font-semibold">Tarefas</span>
+  </button>
+</nav>
+
+<!-- ══════════════════════ TOAST ══════════════════════ -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  DATA LAYER — localStorage persistence
+// ════════════════════════════════════════════
+const STORE_KEY = 'jctech_kanban_v2';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultData(); }
+  catch { return defaultData(); }
+}
+function saveData(d) { localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
+
+function defaultData() {
+  return {
+    projects: [
+      { id: 'proj1', name: 'Campanha Q4 2024', category: 'MARKETING', color: '#005faa', progress: 65, due: '2024-12-12', members: ['JO','MS','RB'] },
+      { id: 'proj2', name: 'Refatoração de API', category: 'DESENVOLVIMENTO', color: '#bc5b00', progress: 28, due: '2024-11-30', members: ['AL'] },
+      { id: 'proj3', name: 'Onboarding 2025', category: 'RH', color: '#456084', progress: 85, due: '2025-01-10', members: ['CM','RB'] }
+    ],
+    tasks: [
+      { id: 't1', projectId: 'proj1', title: 'Mapeamento de jornada do usuário', desc: 'Mapear a jornada completa do usuário para o fluxo de checkout.', tag: 'UX DESIGN', priority: 'alta', status: 'todo', assignees: ['MA'], due: '2024-10-12', start: '2024-10-01', checklist: [{text:'Definir personas',done:true},{text:'Criar fluxo atual',done:true},{text:'Propor melhorias',done:false}], activity: [{user:'MA',action:'criou a tarefa','time':'há 2 dias'}] },
+      { id: 't2', projectId: 'proj1', title: 'Entrevistas com stakeholders da área financeira', desc: '', tag: 'PESQUISA', priority: 'normal', status: 'todo', assignees: ['RF','AL'], due: '2024-10-15', start: '', checklist: [], activity: [] },
+      { id: 't3', projectId: 'proj2', title: 'Refatorar Componentes do Dashboard', desc: 'Migração para microserviços com foco em performance.', tag: 'DEV', priority: 'alta', status: 'inprogress', assignees: ['RF'], due: '2024-11-02', start: '2024-10-25', checklist: [{text:'Revisar documentação da API',done:true},{text:'Validar tokens de cores',done:true},{text:'Otimizar renderização',done:false},{text:'Testar responsividade mobile',done:false}], activity: [{user:'MA',action:'alterou o status para Em Andamento',time:'há 2 horas'},{user:'RF',action:'completou 2 itens da checklist',time:'há 5 horas'}] },
+      { id: 't4', projectId: 'proj2', title: 'Reunião de Alinhamento Semanal', desc: 'Sincronização com o time de engenharia sobre os novos componentes.', tag: 'INTERNO', priority: 'normal', status: 'review', assignees: ['AL','MS'], due: '2024-10-09', start: '', checklist: [], activity: [] },
+      { id: 't5', projectId: 'proj3', title: 'Entrega do Relatório Mensal', desc: 'Consolidação de dados financeiros e KPIs de performance.', tag: 'RELATÓRIO', priority: 'normal', status: 'done', assignees: [], due: '2024-10-11', start: '', checklist: [{text:'Coletar dados',done:true},{text:'Formatar planilha',done:true},{text:'Enviar para gerência',done:true}], activity: [] }
+    ],
+    currentProjectId: 'proj1'
+  };
+}
+
+let DB = loadData();
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let currentView = 'hub';
+let currentTaskId = null;
+let dragSrcCard = null;
+let dragSrcCol = null;
+let calViewMode = 'month';
+let taskFilter = 'all';
+
+// ════════════════════════════════════════════
+//  NAV
+// ════════════════════════════════════════════
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('nav-' + v).classList.add('active');
+  document.getElementById('detail-view').classList.remove('open');
+  document.getElementById('back-btn').classList.add('hidden');
+  document.getElementById('app-title').textContent = 'Central de Tarefas';
+  currentView = v;
+  if (v === 'hub') renderHub();
+  if (v === 'board') renderBoard();
+  if (v === 'calendar') renderCalendar();
+  if (v === 'tasks') renderTasks();
+}
+
+// ════════════════════════════════════════════
+//  HUB
+// ════════════════════════════════════════════
+function renderHub() {
+  const tasks = DB.tasks;
+  const done = tasks.filter(t => t.status === 'done').length;
+  const active = tasks.filter(t => t.status !== 'done').length;
+  const upcoming = tasks.filter(t => t.due && new Date(t.due) >= new Date()).length;
+
+  document.getElementById('hub-stats').innerHTML = `
+    <div class="bg-[#f4f3f2] rounded-xl p-4">
+      <div class="text-[26px] font-extrabold text-[#005faa]">${active}</div>
+      <div class="text-[12px] text-[#404752] font-medium mt-0.5">Tarefas Ativas</div>
+    </div>
+    <div class="bg-[#f4f3f2] rounded-xl p-4">
+      <div class="text-[26px] font-extrabold text-[#1a1c1c]">${done}</div>
+      <div class="text-[12px] text-[#404752] font-medium mt-0.5">Concluídas</div>
+    </div>
+    <div class="bg-[#f4f3f2] rounded-xl p-4">
+      <div class="text-[26px] font-extrabold text-[#bc5b00]">${upcoming}</div>
+      <div class="text-[12px] text-[#404752] font-medium mt-0.5">Próximos Prazos</div>
+    </div>
+    <div class="bg-[#f4f3f2] rounded-xl p-4">
+      <div class="text-[26px] font-extrabold text-[#456084]">${DB.projects.length}</div>
+      <div class="text-[12px] text-[#404752] font-medium mt-0.5">Projetos</div>
+    </div>
+  `;
+
+  document.getElementById('project-list').innerHTML = DB.projects.map(p => {
+    const ptasks = DB.tasks.filter(t => t.projectId === p.id);
+    const pdone = ptasks.filter(t => t.status === 'done').length;
+    const progress = ptasks.length ? Math.round(pdone/ptasks.length*100) : p.progress;
+    const isUrgent = p.due && new Date(p.due) < new Date(Date.now() + 86400000 * 3);
+    return `
+    <div class="project-card" onclick="openProject('${p.id}')">
+      <div class="project-accent" style="background:${p.color}"></div>
+      <div style="padding-left:12px">
+        <div class="mb-2"><span style="background:${p.color}18;color:${p.color};font-size:10px;font-weight:700;padding:2px 10px;border-radius:999px;letter-spacing:.06em">${p.category}</span></div>
+        <div class="font-extrabold text-[16px] text-[#1a1c1c] mb-1">${p.name}</div>
+        <div class="text-[12px] text-[#404752] mb-2">${ptasks.length} tarefas · ${pdone} concluídas</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:linear-gradient(90deg,${p.color},${p.color}cc)"></div></div>
+        <div class="flex justify-between items-center mt-1">
+          <div class="flex">${p.members.map(m => `<div class="avatar" style="background:${p.color}25;color:${p.color};font-size:8px">${m}</div>`).join('')}</div>
+          <span class="text-[11px] font-medium ${isUrgent ? 'text-error' : 'text-[#717783]'}" style="display:flex;align-items:center;gap:3px">
+            <span class="material-symbols-outlined" style="font-size:13px">${isUrgent ? 'alarm' : 'calendar_today'}</span>
+            ${formatDate(p.due)}
+          </span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openProject(id) {
+  DB.currentProjectId = id;
+  saveData(DB);
+  switchView('board');
+}
+
+// ════════════════════════════════════════════
+//  BOARD (KANBAN)
+// ════════════════════════════════════════════
+const COLS = [
+  { id: 'todo', label: 'A Fazer' },
+  { id: 'inprogress', label: 'Em Andamento' },
+  { id: 'review', label: 'Em Revisão' },
+  { id: 'done', label: 'Concluído' }
+];
+
+function renderBoard() {
+  const proj = DB.projects.find(p => p.id === DB.currentProjectId) || DB.projects[0];
+  if (!proj) return;
+  DB.currentProjectId = proj.id;
+
+  document.getElementById('board-project-label').textContent = proj.category;
+  document.getElementById('board-project-name').textContent = proj.name;
+
+  const scroll = document.getElementById('board-scroll');
+  scroll.innerHTML = '';
+
+  COLS.forEach(col => {
+    const colTasks = DB.tasks.filter(t => t.projectId === proj.id && t.status === col.id);
+    const colEl = document.createElement('div');
+    colEl.className = 'kanban-col';
+    colEl.innerHTML = `
+      <div class="col-header">
+        <div class="flex items-center gap-2">
+          <span class="col-title">${col.label}</span>
+          <span class="col-count" id="count-${col.id}">${colTasks.length}</span>
+        </div>
+        <button onclick="openNewTaskModal('${col.id}')" class="text-[#717783] hover:text-primary hover:bg-white rounded-lg p-1 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">more_horiz</span>
+        </button>
+      </div>
+      <div class="col-cards" id="col-${col.id}" data-col="${col.id}">
+        ${colTasks.map(t => buildCardHTML(t)).join('')}
+        <button class="add-card-btn" onclick="openNewTaskModal('${col.id}')">
+          <span class="material-symbols-outlined text-[16px]">add</span> Adicionar tarefa
+        </button>
+      </div>
+    `;
+    scroll.appendChild(colEl);
+  });
+
+  initDragDrop();
+}
+
+function buildCardHTML(t) {
+  const chipStyle = getChipStyle(t.tag);
+  const priorityClass = t.priority === 'alta' ? 'priority-alta' : 'priority-normal';
+  const checkedCount = t.checklist.filter(c => c.done).length;
+  const checklistHTML = t.checklist.length ? `<div style="font-size:11px;color:#717783;margin-top:6px;display:flex;align-items:center;gap:3px"><span class="material-symbols-outlined" style="font-size:13px">checklist</span>${checkedCount}/${t.checklist.length}</div>` : '';
+  const dueFmt = t.due ? formatDate(t.due) : '';
+  const isOverdue = t.due && new Date(t.due) < new Date() && t.status !== 'done';
+  return `
+  <div class="task-card ${priorityClass}" data-id="${t.id}" draggable="true" onclick="openDetail('${t.id}')">
+    ${t.priority === 'alta' ? '<div class="accent-strip"></div>' : ''}
+    <div style="padding-left:${t.priority==='alta'?'10px':'0'}">
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        ${t.tag ? `<span class="card-chip ${t.tag.toLowerCase()}" style="${chipStyle}">${t.tag}</span>` : ''}
+        ${t.priority === 'alta' ? `<span class="card-chip alta">ALTA</span>` : ''}
+      </div>
+      <div class="card-title">${t.title}</div>
+      ${t.desc ? `<div class="card-desc">${t.desc.substring(0,80)}${t.desc.length>80?'…':''}</div>` : ''}
+      ${checklistHTML}
+      <div class="card-meta">
+        ${dueFmt ? `<span class="card-date" style="${isOverdue?'color:#ba1a1a':''}"><span class="material-symbols-outlined" style="font-size:13px">calendar_today</span>${dueFmt}</span>` : '<span></span>'}
+        <div class="avatar-stack">${(t.assignees||[]).slice(0,3).map(a => `<div class="avatar">${a}</div>`).join('')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function getChipStyle(tag) {
+  const map = {
+    'UX DESIGN': 'background:#d3e3ff;color:#004883',
+    'PESQUISA': 'background:#e3e2e1;color:#404752',
+    'DEV': 'background:#adc8f2;color:#001c39',
+    'INTERNO': 'background:#d3e3ff;color:#004883',
+    'RELATÓRIO': 'background:#ffdbc8;color:#743500',
+    'MARKETING': 'background:#adc8f2;color:#001c39',
+    'RH': 'background:#e3e2e1;color:#404752',
+  };
+  return map[tag] || 'background:#e3e2e1;color:#404752';
+}
+
+// ════════════════════════════════════════════
+//  DRAG & DROP
+// ════════════════════════════════════════════
+function initDragDrop() {
+  document.querySelectorAll('.task-card').forEach(card => {
+    card.addEventListener('dragstart', onDragStart);
+    card.addEventListener('dragend', onDragEnd);
+  });
+  document.querySelectorAll('.col-cards').forEach(col => {
+    col.addEventListener('dragover', onDragOver);
+    col.addEventListener('dragleave', onDragLeave);
+    col.addEventListener('drop', onDrop);
+  });
+}
+
+function onDragStart(e) {
+  dragSrcCard = this;
+  dragSrcCol = this.closest('.col-cards');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', this.dataset.id);
+  setTimeout(() => this.classList.add('dragging'), 0);
+  this.classList.add('drag-ghost');
+}
+function onDragEnd(e) {
+  this.classList.remove('dragging', 'drag-ghost');
+  document.querySelectorAll('.col-cards').forEach(c => c.classList.remove('drag-over'));
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  this.classList.add('drag-over');
+  // Insert placeholder position
+  const afterEl = getDragAfterElement(this, e.clientY);
+  if (afterEl == null) {
+    const btn = this.querySelector('.add-card-btn');
+    if (btn) this.insertBefore(dragSrcCard, btn);
+    else this.appendChild(dragSrcCard);
+  } else {
+    this.insertBefore(dragSrcCard, afterEl);
+  }
+}
+function onDragLeave(e) { this.classList.remove('drag-over'); }
+function onDrop(e) {
+  e.preventDefault();
+  const taskId = e.dataTransfer.getData('text/plain');
+  const newStatus = this.dataset.col;
+  const task = DB.tasks.find(t => t.id === taskId);
+  if (task && task.status !== newStatus) {
+    const oldStatus = task.status;
+    task.status = newStatus;
+    task.activity.unshift({ user: 'Você', action: `moveu de "${statusLabel(oldStatus)}" para "${statusLabel(newStatus)}"`, time: 'agora' });
+    saveData(DB);
+    showToast(`Tarefa movida para "${statusLabel(newStatus)}"`);
+    updateColCounts();
+  }
+  this.classList.remove('drag-over');
+}
+
+function getDragAfterElement(container, y) {
+  const els = [...container.querySelectorAll('.task-card:not(.dragging)')];
+  return els.reduce((closest, el) => {
+    const box = el.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: el };
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function updateColCounts() {
+  const proj = DB.projects.find(p => p.id === DB.currentProjectId);
+  if (!proj) return;
+  COLS.forEach(col => {
+    const el = document.getElementById('count-' + col.id);
+    if (el) el.textContent = DB.tasks.filter(t => t.projectId === proj.id && t.status === col.id).length;
+  });
+}
+
+function statusLabel(s) {
+  return { todo: 'A Fazer', inprogress: 'Em Andamento', review: 'Em Revisão', done: 'Concluído' }[s] || s;
+}
+
+// ════════════════════════════════════════════
+//  TASK DETAIL
+// ════════════════════════════════════════════
+function openDetail(id) {
+  currentTaskId = id;
+  const t = DB.tasks.find(t => t.id === id);
+  if (!t) return;
+
+  document.getElementById('d-title').value = t.title;
+  document.getElementById('d-status').value = t.status;
+  document.getElementById('d-priority').value = t.priority;
+  document.getElementById('d-assignee').value = (t.assignees || []).join(', ');
+  document.getElementById('d-tag').value = t.tag || '';
+  document.getElementById('d-desc').value = t.desc || '';
+  document.getElementById('d-start').value = t.start || '';
+  document.getElementById('d-due').value = t.due || '';
+
+  renderChecklist(t);
+  renderActivity(t);
+
+  document.getElementById('detail-view').classList.add('open');
+  document.getElementById('back-btn').classList.remove('hidden');
+  document.getElementById('app-title').textContent = 'Detalhes da Tarefa';
+}
+
+function renderChecklist(t) {
+  const done = t.checklist.filter(c => c.done).length;
+  document.getElementById('checklist-counter').textContent = `${done} de ${t.checklist.length} concluídos`;
+  document.getElementById('checklist-items').innerHTML = t.checklist.map((item, i) => `
+    <div class="checklist-item ${item.done ? 'done' : ''}">
+      <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleCheck(${i})"/>
+      <span class="flex-grow text-[13px] font-medium text-[#1a1c1c]">${item.text}</span>
+      <button onclick="removeCheck(${i})" class="opacity-0 group-hover:opacity-100 text-[#717783] hover:text-error transition-colors">
+        <span class="material-symbols-outlined text-[16px]">delete</span>
+      </button>
+    </div>`).join('');
+  document.querySelectorAll('.checklist-item').forEach(el => {
+    el.addEventListener('mouseenter', () => el.querySelector('button').style.opacity = '1');
+    el.addEventListener('mouseleave', () => el.querySelector('button').style.opacity = '0');
+  });
+}
+
+function renderActivity(t) {
+  document.getElementById('d-activity').innerHTML = t.activity.length
+    ? t.activity.map(a => `
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div style="width:24px;height:24px;border-radius:999px;background:#005faa;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${a.user.substring(0,2).toUpperCase()}</div>
+        <div>
+          <p style="font-size:11px;color:#1a1c1c"><span style="font-weight:700">${a.user}</span> ${a.action}</p>
+          <p style="font-size:10px;color:#717783;margin-top:2px;text-transform:uppercase">${a.time}</p>
+        </div>
+      </div>`).join('')
+    : '<p style="font-size:12px;color:#717783">Nenhuma atividade ainda.</p>';
+}
+
+function toggleCheck(i) {
+  const t = DB.tasks.find(t => t.id === currentTaskId);
+  if (!t) return;
+  t.checklist[i].done = !t.checklist[i].done;
+  saveData(DB);
+  renderChecklist(t);
+}
+function removeCheck(i) {
+  const t = DB.tasks.find(t => t.id === currentTaskId);
+  if (!t) return;
+  t.checklist.splice(i, 1);
+  saveData(DB);
+  renderChecklist(t);
+}
+function addChecklistItem() {
+  const text = prompt('Nome do item:');
+  if (!text) return;
+  const t = DB.tasks.find(t => t.id === currentTaskId);
+  if (!t) return;
+  t.checklist.push({ text, done: false });
+  saveData(DB);
+  renderChecklist(t);
+}
+
+function saveCurrentTask() {
+  const t = DB.tasks.find(t => t.id === currentTaskId);
+  if (!t) return;
+  const oldStatus = t.status;
+  t.title = document.getElementById('d-title').value || t.title;
+  t.status = document.getElementById('d-status').value;
+  t.priority = document.getElementById('d-priority').value;
+  t.desc = document.getElementById('d-desc').value;
+  t.tag = document.getElementById('d-tag').value.toUpperCase();
+  t.start = document.getElementById('d-start').value;
+  t.due = document.getElementById('d-due').value;
+  const assigneeStr = document.getElementById('d-assignee').value;
+  t.assignees = assigneeStr ? assigneeStr.split(',').map(s => s.trim().substring(0,2).toUpperCase()).filter(Boolean) : [];
+  if (t.status !== oldStatus) {
+    t.activity.unshift({ user: 'Você', action: `alterou o status para ${statusLabel(t.status)}`, time: 'agora' });
+  }
+  saveData(DB);
+  showToast('Tarefa salva com sucesso!');
+  closeDetail();
+}
+
+function deleteCurrentTask() {
+  if (!confirm('Excluir esta tarefa?')) return;
+  DB.tasks = DB.tasks.filter(t => t.id !== currentTaskId);
+  saveData(DB);
+  showToast('Tarefa excluída.');
+  closeDetail();
+}
+
+function closeDetail() {
+  document.getElementById('detail-view').classList.remove('open');
+  document.getElementById('back-btn').classList.add('hidden');
+  document.getElementById('app-title').textContent = 'Central de Tarefas';
+  if (currentView === 'board') renderBoard();
+  if (currentView === 'tasks') renderTasks();
+  if (currentView === 'hub') renderHub();
+}
+
+// ════════════════════════════════════════════
+//  MODALS
+// ════════════════════════════════════════════
+let modalMode = null;
+let newTaskDefaultStatus = 'todo';
+
+function openNewTaskModal(defaultStatus) {
+  newTaskDefaultStatus = defaultStatus || 'todo';
+  modalMode = 'task';
+  document.getElementById('modal-title').textContent = 'Nova Tarefa';
+  const proj = DB.projects.find(p => p.id === DB.currentProjectId) || DB.projects[0];
+  document.getElementById('modal-content').innerHTML = `
+    <div class="space-y-4">
+      <div>
+        <label class="modal-label">Título *</label>
+        <input id="m-title" class="modal-input" placeholder="O que precisa ser feito?" autofocus/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="modal-label">Status</label>
+          <select id="m-status" class="modal-input modal-select">
+            <option value="todo" ${newTaskDefaultStatus==='todo'?'selected':''}>A Fazer</option>
+            <option value="inprogress" ${newTaskDefaultStatus==='inprogress'?'selected':''}>Em Andamento</option>
+            <option value="review" ${newTaskDefaultStatus==='review'?'selected':''}>Em Revisão</option>
+            <option value="done" ${newTaskDefaultStatus==='done'?'selected':''}>Concluído</option>
+          </select>
+        </div>
+        <div>
+          <label class="modal-label">Prioridade</label>
+          <select id="m-priority" class="modal-input modal-select">
+            <option value="normal">Normal</option>
+            <option value="alta">Alta</option>
+            <option value="baixa">Baixa</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="modal-label">Categoria</label>
+        <input id="m-tag" class="modal-input" placeholder="ex: Design, Dev, Marketing"/>
+      </div>
+      <div>
+        <label class="modal-label">Responsável (iniciais)</label>
+        <input id="m-assignee" class="modal-input" placeholder="ex: RF, MA"/>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="modal-label">Início</label>
+          <input id="m-start" type="date" class="modal-input"/>
+        </div>
+        <div>
+          <label class="modal-label">Entrega</label>
+          <input id="m-due" type="date" class="modal-input"/>
+        </div>
+      </div>
+      <div>
+        <label class="modal-label">Descrição</label>
+        <textarea id="m-desc" class="modal-input" rows="3" placeholder="Descrição opcional..."></textarea>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+        <button class="btn-primary" onclick="createTask()">Criar Tarefa</button>
+      </div>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openNewProjectModal() {
+  modalMode = 'project';
+  document.getElementById('modal-title').textContent = 'Novo Projeto';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="space-y-4">
+      <div>
+        <label class="modal-label">Nome do Projeto *</label>
+        <input id="p-name" class="modal-input" placeholder="Nome do projeto" autofocus/>
+      </div>
+      <div>
+        <label class="modal-label">Categoria</label>
+        <input id="p-cat" class="modal-input" placeholder="ex: Marketing, Dev, RH"/>
+      </div>
+      <div>
+        <label class="modal-label">Data de Entrega</label>
+        <input id="p-due" type="date" class="modal-input"/>
+      </div>
+      <div>
+        <label class="modal-label">Cor do Projeto</label>
+        <input id="p-color" type="color" value="#005faa" class="modal-input" style="height:44px;cursor:pointer;padding:4px"/>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+        <button class="btn-primary" onclick="createProject()">Criar Projeto</button>
+      </div>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function createTask() {
+  const title = document.getElementById('m-title').value.trim();
+  if (!title) { document.getElementById('m-title').focus(); return; }
+  const assigneeStr = document.getElementById('m-assignee').value;
+  const assignees = assigneeStr ? assigneeStr.split(',').map(s => s.trim().substring(0,2).toUpperCase()).filter(Boolean) : [];
+  const task = {
+    id: 't' + Date.now(),
+    projectId: DB.currentProjectId || DB.projects[0]?.id,
+    title,
+    desc: document.getElementById('m-desc').value,
+    tag: document.getElementById('m-tag').value.toUpperCase(),
+    priority: document.getElementById('m-priority').value,
+    status: document.getElementById('m-status').value,
+    assignees,
+    due: document.getElementById('m-due').value,
+    start: document.getElementById('m-start').value,
+    checklist: [],
+    activity: [{ user: 'Você', action: 'criou a tarefa', time: 'agora' }]
+  };
+  DB.tasks.push(task);
+  saveData(DB);
+  closeModal();
+  showToast('Tarefa criada!');
+  if (currentView === 'board') renderBoard();
+  if (currentView === 'tasks') renderTasks();
+  if (currentView === 'hub') renderHub();
+}
+
+function createProject() {
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { document.getElementById('p-name').focus(); return; }
+  const proj = {
+    id: 'proj' + Date.now(),
+    name,
+    category: (document.getElementById('p-cat').value || 'GERAL').toUpperCase(),
+    color: document.getElementById('p-color').value,
+    progress: 0,
+    due: document.getElementById('p-due').value,
+    members: ['VC']
+  };
+  DB.projects.push(proj);
+  DB.currentProjectId = proj.id;
+  saveData(DB);
+  closeModal();
+  showToast('Projeto criado!');
+  switchView('board');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ════════════════════════════════════════════
+//  TASKS LIST VIEW
+// ════════════════════════════════════════════
+function renderTasks() {
+  const filters = ['all', 'todo', 'inprogress', 'review', 'done'];
+  const labels = { all:'Todas', todo:'A Fazer', inprogress:'Em Andamento', review:'Em Revisão', done:'Concluído' };
+  document.getElementById('task-filter-chips').innerHTML = filters.map(f => `
+    <button onclick="setTaskFilter('${f}')" id="tf-${f}" class="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${taskFilter===f ? 'bg-primary text-white' : 'bg-white text-[#404752]'}">${labels[f]}</button>
+  `).join('');
+
+  const tasks = taskFilter === 'all' ? DB.tasks : DB.tasks.filter(t => t.status === taskFilter);
+  document.getElementById('task-list').innerHTML = tasks.length ? tasks.map(t => {
+    const proj = DB.projects.find(p => p.id === t.projectId);
+    const isOverdue = t.due && new Date(t.due) < new Date() && t.status !== 'done';
+    return `
+    <div class="bg-white rounded-2xl p-4 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden" onclick="openDetail('${t.id}')">
+      ${t.priority==='alta' ? `<div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#bc5b00;border-radius:4px 0 0 4px"></div>` : ''}
+      <div style="padding-left:${t.priority==='alta'?'10px':'0'}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            ${t.tag ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;background:#e3e2e1;color:#404752">${t.tag}</span>` : ''}
+            <div style="font-weight:700;font-size:14px;color:#1a1c1c;margin-top:6px">${t.title}</div>
+            ${proj ? `<div style="font-size:11px;color:#717783;margin-top:2px">${proj.name}</div>` : ''}
+          </div>
+          <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;background:${statusColor(t.status)};color:${statusTextColor(t.status)};white-space:nowrap;margin-left:8px">${statusLabel(t.status)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <span style="font-size:11px;color:${isOverdue?'#ba1a1a':'#717783'};display:flex;align-items:center;gap:3px">
+            <span class="material-symbols-outlined" style="font-size:13px">calendar_today</span>
+            ${t.due ? formatDate(t.due) : 'Sem prazo'}
+          </span>
+          <div style="display:flex">${(t.assignees||[]).slice(0,3).map(a => `<div style="width:22px;height:22px;border-radius:999px;background:#adc8f2;border:2px solid #fff;color:#001c39;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:-4px">${a}</div>`).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('') : `<div style="text-align:center;padding:40px 0;color:#717783;font-size:14px">Nenhuma tarefa encontrada.</div>`;
+}
+
+function setTaskFilter(f) {
+  taskFilter = f;
+  renderTasks();
+}
+function statusColor(s) { return {todo:'#f4f3f2',inprogress:'#d3e3ff',review:'#ffdbc8',done:'#e3e2e1'}[s]||'#f4f3f2'; }
+function statusTextColor(s) { return {todo:'#404752',inprogress:'#004883',review:'#743500',done:'#717783'}[s]||'#404752'; }
+
+// ════════════════════════════════════════════
+//  CALENDAR
+// ════════════════════════════════════════════
+function setCalView(v) { calViewMode = v; renderCalendar(); }
+
+function renderCalendar() {
+  const now = new Date();
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cal-month-label').textContent = `${months[now.getMonth()]} ${now.getFullYear()} · Você tem ${DB.tasks.filter(t=>t.due).length} tarefas agendadas`;
+
+  document.getElementById('cal-btn-month').className = `px-4 py-2 rounded-xl text-[13px] font-semibold border border-[#c0c7d4]/30 transition-all ${calViewMode==='month' ? 'bg-primary text-white border-primary' : 'bg-white text-[#404752]'}`;
+  document.getElementById('cal-btn-week').className = `px-4 py-2 rounded-xl text-[13px] font-semibold border border-[#c0c7d4]/30 transition-all ${calViewMode==='week' ? 'bg-primary text-white border-primary' : 'bg-white text-[#404752]'}`;
+
+  const grid = document.getElementById('cal-grid');
+  const days = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+
+  let html = `<div style="display:grid;grid-template-columns:repeat(7,1fr);background:#efeeed">`;
+  days.forEach(d => { html += `<div style="padding:10px 4px;text-align:center;font-size:10px;font-weight:700;color:#404752">${d}</div>`; });
+  html += `</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#efeeed">`;
+  for (let i = 0; i < firstDay; i++) html += `<div style="background:#fff;min-height:44px"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === now.getDate();
+    const tasksOnDay = DB.tasks.filter(t => t.due && new Date(t.due).getDate() === d && new Date(t.due).getMonth() === now.getMonth());
+    html += `<div style="background:#fff;min-height:44px;padding:6px 4px;text-align:center;cursor:pointer" onclick="">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:999px;font-size:12px;font-weight:${isToday?'800':'500'};color:${isToday?'#fff':'#1a1c1c'};background:${isToday?'#005faa':'transparent'}">${d}</span>
+      ${tasksOnDay.slice(0,2).map(t => `<div style="height:3px;border-radius:999px;background:${t.priority==='alta'?'#bc5b00':'#005faa'};margin:1px 2px"></div>`).join('')}
+    </div>`;
+  }
+  html += `</div>`;
+  grid.innerHTML = html;
+
+  // Upcoming
+  const upcoming = DB.tasks.filter(t => t.due).sort((a,b) => new Date(a.due)-new Date(b.due)).slice(0,5);
+  document.getElementById('cal-upcoming').innerHTML = upcoming.map(t => {
+    const isOverdue = new Date(t.due) < new Date() && t.status !== 'done';
+    const dueD = new Date(t.due);
+    return `
+    <div class="bg-white rounded-2xl p-4 cursor-pointer hover:shadow-md transition-shadow flex gap-4" onclick="openDetail('${t.id}')">
+      <div style="text-align:center;min-width:40px">
+        <div style="font-size:10px;font-weight:700;color:#717783;text-transform:uppercase">${['DOM','SEG','TER','QUA','QUI','SEX','SÁB'][dueD.getDay()]}</div>
+        <div style="font-size:20px;font-weight:800;color:${isOverdue?'#ba1a1a':'#005faa'}">${dueD.getDate()}</div>
+      </div>
+      <div style="flex:1;border-left:3px solid ${t.priority==='alta'?'#bc5b00':'#efeeed'};padding-left:12px">
+        ${t.tag ? `<span style="font-size:10px;font-weight:700;padding:1px 8px;border-radius:999px;background:#e3e2e1;color:#404752">${t.tag}</span>` : ''}
+        <div style="font-weight:700;font-size:14px;color:#1a1c1c;margin-top:4px">${t.title}</div>
+        ${t.desc ? `<div style="font-size:12px;color:#404752;margin-top:3px">${t.desc.substring(0,60)}…</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+//  SEARCH
+// ════════════════════════════════════════════
+function openSearch() {
+  document.getElementById('modal-title').textContent = 'Buscar';
+  document.getElementById('modal-content').innerHTML = `
+    <input id="search-input" class="modal-input" placeholder="Buscar tarefas..." oninput="runSearch()" autofocus/>
+    <div id="search-results" class="mt-4 space-y-2"></div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function runSearch() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  if (!q) { document.getElementById('search-results').innerHTML = ''; return; }
+  const res = DB.tasks.filter(t => t.title.toLowerCase().includes(q) || (t.desc||'').toLowerCase().includes(q));
+  document.getElementById('search-results').innerHTML = res.length
+    ? res.map(t => `<div class="p-3 bg-[#f4f3f2] rounded-xl cursor-pointer hover:bg-[#efeeed] transition-colors" onclick="closeModal();openDetail('${t.id}')">
+        <div style="font-weight:600;font-size:13px;color:#1a1c1c">${t.title}</div>
+        <div style="font-size:11px;color:#717783;margin-top:2px">${statusLabel(t.status)} · ${t.due ? formatDate(t.due) : 'Sem prazo'}</div>
+      </div>`).join('')
+    : '<p style="font-size:13px;color:#717783;text-align:center;padding:12px">Nenhum resultado encontrado.</p>';
+}
+
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const now = new Date();
+  if (dt.toDateString() === now.toDateString()) return 'Hoje';
+  const tomorrow = new Date(now); tomorrow.setDate(now.getDate()+1);
+  if (dt.toDateString() === tomorrow.toDateString()) return 'Amanhã';
+  return `${dt.getDate()} ${months[dt.getMonth()]}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function uid() { return 't' + Math.random().toString(36).slice(2,9); }
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+switchView('hub');
+</script>
+</body>
+</html>
