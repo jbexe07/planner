@@ -7,10 +7,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Central de Tarefas</title>
-
+ 
 <!-- Supabase JS SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+ 
 <!-- Tailwind + Design Tokens -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -28,7 +28,7 @@ tailwind.config = {
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-
+ 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:#f4f3f2;color:#1a1c1c;min-height:100vh}
@@ -36,15 +36,15 @@ body{font-family:'Inter',sans-serif;background:#f4f3f2;color:#1a1c1c;min-height:
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#c0c7d4;border-radius:10px}
 .ms{font-family:'Material Symbols Outlined';font-size:20px;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;line-height:1;vertical-align:middle;user-select:none}
-
+ 
 /* ── AUTH ── */
 #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh}
 .auth-card{background:#fff;border-radius:20px;padding:36px 32px;width:92%;max-width:380px;box-shadow:0 20px 60px rgba(26,28,28,.12)}
-
+ 
 /* ── APP ── */
 #app{display:none;flex-direction:column;height:100vh;overflow:hidden}
 header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(192,199,212,.2);padding:11px 20px;display:flex;align-items:center;gap:10px;z-index:100;flex-shrink:0;position:relative}
-
+ 
 /* ── SIDEBAR ── */
 #sidebar{width:232px;background:#fff;border-right:1px solid rgba(192,199,212,.18);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
 .s-section{padding:16px 12px 6px;font-size:10px;font-weight:700;color:#717783;text-transform:uppercase;letter-spacing:.08em;display:flex;justify-content:space-between;align-items:center}
@@ -53,21 +53,21 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 .s-item.active{background:rgba(0,95,170,.1);color:#005faa;font-weight:600}
 .s-item .ms{font-size:17px}
 .proj-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-
+ 
 /* ── VIEWS ── */
 #main-content{flex:1;overflow:hidden;display:flex;flex-direction:column}
 .view{display:none;flex:1;flex-direction:column;overflow:hidden}
 .view.active{display:flex}
 .view-scroll{flex:1;overflow-y:auto;padding:20px}
 .view-topbar{padding:14px 20px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(192,199,212,.15);background:#faf9f8;flex-shrink:0}
-
+ 
 /* ── KANBAN ── */
 #board-cols{flex:1;overflow-x:auto;overflow-y:hidden;padding:14px 20px 20px;display:flex;gap:14px;align-items:flex-start}
 .k-col{min-width:268px;width:268px;background:#efeeed;border-radius:14px;display:flex;flex-direction:column;max-height:100%;flex-shrink:0}
 .k-col-header{padding:13px 13px 9px;display:flex;align-items:center;gap:7px;flex-shrink:0}
 .k-col-cards{padding:4px 9px 9px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:56px}
 .k-col-cards.drag-over{background:rgba(0,95,170,.06);outline:2px dashed rgba(0,95,170,.28);outline-offset:-3px;border-radius:9px}
-
+ 
 /* ── CARD ── */
 .k-card{background:#fff;border-radius:11px;padding:13px;cursor:grab;position:relative;transition:box-shadow .2s;user-select:none;animation:cardIn .18s ease}
 .k-card:hover{box-shadow:0 6px 18px rgba(26,28,28,.10)}
@@ -95,7 +95,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 .card-btn .ms{font-size:14px}
 .add-col-btn{display:flex;align-items:center;gap:5px;padding:8px 9px;border:2px dashed rgba(192,199,212,.45);border-radius:9px;color:#717783;font-size:12px;font-weight:500;cursor:pointer;background:none;width:100%;margin-top:3px;font-family:'Inter',sans-serif;transition:all .18s}
 .add-col-btn:hover{border-color:rgba(0,95,170,.38);color:#005faa;background:rgba(0,95,170,.03)}
-
+ 
 /* ── HUB ── */
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
 .stat-card{background:#fff;border-radius:13px;padding:15px 17px}
@@ -107,7 +107,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 .proj-body{padding-left:13px}
 .prog-bar-thin{height:4px;background:#efeeed;border-radius:999px;overflow:hidden;margin:9px 0 5px}
 .prog-fill-thin{height:100%;border-radius:999px;transition:width .5s}
-
+ 
 /* ── CALENDAR ── */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);background:#fff;border-radius:13px;overflow:hidden;margin-bottom:14px}
 .cal-dh{padding:9px 4px;text-align:center;font-size:10px;font-weight:700;color:#717783;background:#efeeed}
@@ -116,12 +116,12 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 .cal-d.today .cal-dnum{background:#005faa;color:#fff;font-weight:800}
 .cal-dnum{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:999px;font-size:12px;font-weight:500}
 .cal-dot{height:3px;border-radius:999px;margin:1px 3px;background:#005faa}
-
+ 
 /* ── TASK ROW ── */
 .t-row{background:#fff;border-radius:13px;padding:13px 15px;margin-bottom:9px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:box-shadow .2s;position:relative;overflow:hidden}
 .t-row:hover{box-shadow:0 4px 15px rgba(26,28,28,.08)}
 .t-row-accent{position:absolute;left:0;top:0;bottom:0;width:4px}
-
+ 
 /* ── DETAIL PANEL ── */
 #detail-panel{position:fixed;inset:0;z-index:400;background:#f4f3f2;overflow-y:auto;display:none;animation:slideUp .2s ease}
 #detail-panel.open{display:block}
@@ -137,7 +137,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 .att-item:hover{background:#e9e8e7}
 .act-item{display:flex;gap:9px;margin-bottom:10px}
 .act-av{width:24px;height:24px;border-radius:999px;background:#005faa;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-
+ 
 /* ── MODAL ── */
 .m-overlay{position:fixed;inset:0;background:rgba(26,28,28,.32);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:14px}
 .m-overlay.open{display:flex;animation:fadein .16s ease}
@@ -152,13 +152,13 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 .f-input.err~.f-err{display:block}
 .f-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .m-footer{display:flex;justify-content:flex-end;gap:9px;margin-top:18px;padding-top:14px;border-top:1px solid rgba(192,199,212,.28)}
-
+ 
 /* ── ASSIGNEES ── */
 .a-list{display:flex;flex-direction:column;gap:4px;max-height:144px;overflow-y:auto;padding:2px}
 .a-check{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13px;transition:background .14s}
 .a-check:hover{background:#f4f3f2}
 .a-check input{width:14px;height:14px;accent-color:#005faa;cursor:pointer}
-
+ 
 /* ── BUTTONS ── */
 .btn-p{background:linear-gradient(135deg,#005faa,#0078d4);color:#fff;font-weight:600;font-size:13px;border-radius:10px;padding:9px 20px;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:opacity .14s,transform .1s;display:inline-flex;align-items:center;gap:5px}
 .btn-p:hover{opacity:.9}
@@ -170,24 +170,24 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 .btn-d:hover{background:rgba(186,26,26,.07)}
 .btn-i{background:none;border:none;cursor:pointer;color:#717783;padding:5px;border-radius:7px;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:3px;transition:background .14s,color .14s}
 .btn-i:hover{background:#efeeed;color:#1a1c1c}
-
+ 
 /* ── UPLOAD ZONE ── */
 .upload-zone{border:2px dashed rgba(192,199,212,.48);border-radius:9px;padding:14px;text-align:center;cursor:pointer;color:#717783;font-size:13px;transition:all .18s}
 .upload-zone:hover,.upload-zone.drag-over{border-color:rgba(0,95,170,.38);color:#005faa;background:rgba(0,95,170,.03)}
-
+ 
 /* ── SEARCH ── */
 .srch{background:#efeeed;border:2px solid transparent;border-radius:9px;padding:7px 12px 7px 34px;font-size:13px;color:#1a1c1c;font-family:'Inter',sans-serif;outline:none;width:170px;transition:all .2s}
 .srch:focus{background:#fff;border-color:rgba(0,95,170,.28);width:210px}
 .srch-wrap{position:relative}
 .srch-wrap .ms{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:17px;color:#717783;pointer-events:none}
-
+ 
 /* ── TOAST / SPINNER ── */
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(8px);background:#1a1c1c;color:#fff;padding:9px 18px;border-radius:11px;font-size:13px;font-weight:500;opacity:0;transition:opacity .22s,transform .22s;z-index:999;pointer-events:none;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .spinner{width:18px;height:18px;border:2px solid rgba(0,95,170,.2);border-top-color:#005faa;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 #offline-bar{display:none;background:#ffdad6;color:#ba1a1a;padding:7px 20px;font-size:12px;font-weight:600;text-align:center}
-
+ 
 /* ── MISC ── */
 .role-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:#d3e3ff;color:#004883}
 .role-badge.admin{background:#ffdbc8;color:#743500}
@@ -196,19 +196,19 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 </style>
 </head>
 <body>
-
+ 
 <!-- ══ OFFLINE BAR ══ -->
 <div id="offline-bar"><span class="ms" style="font-size:14px">wifi_off</span> Sem conexão — alterações serão sincronizadas quando voltar</div>
-
+ 
 <!-- ══ AUTH ══ -->
 <div id="auth-screen">
   <div class="auth-card">
     <div style="color:#005faa;margin-bottom:14px"><span class="ms" style="font-size:36px">grid_view</span></div>
     <div style="font-size:21px;font-weight:800;color:#1a1c1c">Central de Tarefas</div>
     <div style="font-size:13px;color:#717783;margin-bottom:24px;margin-top:3px">Faça login para continuar</div>
-
+ 
     <div id="auth-err" style="display:none;background:#ffdad6;color:#ba1a1a;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px"></div>
-
+ 
     <div style="margin-bottom:11px">
       <label class="f-label">E-mail</label>
       <input id="au-email" type="email" class="f-input" placeholder="seu@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')loginEmail()"/>
@@ -217,17 +217,17 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       <label class="f-label">Senha</label>
       <input id="au-pass" type="password" class="f-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')loginEmail()"/>
     </div>
-
+ 
     <button class="btn-p" id="auth-btn" onclick="loginEmail()" style="width:100%;justify-content:center">
       <span class="ms">login</span> Entrar
     </button>
-
+ 
     <div style="display:flex;align-items:center;gap:8px;margin:12px 0">
       <div style="flex:1;height:1px;background:#efeeed"></div>
       <span style="font-size:12px;color:#717783">ou</span>
       <div style="flex:1;height:1px;background:#efeeed"></div>
     </div>
-
+ 
     <button onclick="loginGoogle()" style="width:100%;background:#fff;border:2px solid rgba(192,199,212,.5);border-radius:10px;padding:9px;font-size:13px;font-weight:600;color:#1a1c1c;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Inter',sans-serif;transition:background .14s" onmouseover="this.style.background='#f4f3f2'" onmouseout="this.style.background='#fff'">
       <svg width="17" height="17" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.5 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.4-.1-2.7-.1-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 19 12 24 12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C34 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-1.9 13.5-5.1l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.4-11.2-8.1l-6.6 5.1C9.7 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-1 2.9-2.9 5.3-5.5 7l6.2 5.2C40.4 36.4 44 30.6 44 24c0-1.4-.1-2.7-.4-4z"/></svg>
       Entrar com Google
@@ -237,7 +237,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
     </p>
   </div>
 </div>
-
+ 
 <!-- ══ APP ══ -->
 <div id="app">
   <header>
@@ -261,7 +261,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       </div>
     </div>
   </header>
-
+ 
   <div style="display:flex;flex:1;overflow:hidden">
     <!-- SIDEBAR -->
     <aside id="sidebar">
@@ -276,10 +276,10 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       </div>
       <div id="sb-projects"></div>
     </aside>
-
+ 
     <!-- MAIN -->
     <div id="main-content">
-
+ 
       <!-- HUB -->
       <div class="view active" id="view-hub">
         <div class="view-scroll">
@@ -291,7 +291,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
           <div id="hub-projects"></div>
         </div>
       </div>
-
+ 
       <!-- BOARD -->
       <div class="view" id="view-board" style="flex-direction:column">
         <div class="view-topbar">
@@ -313,7 +313,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
         </div>
         <div id="board-cols"></div>
       </div>
-
+ 
       <!-- CALENDAR -->
       <div class="view" id="view-calendar">
         <div class="view-scroll">
@@ -329,7 +329,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
           <div id="cal-tasks"></div>
         </div>
       </div>
-
+ 
       <!-- TASKS LIST -->
       <div class="view" id="view-tasks">
         <div class="view-scroll">
@@ -345,11 +345,11 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
           <div id="tasks-list"></div>
         </div>
       </div>
-
+ 
     </div><!-- /main-content -->
   </div><!-- /flex -->
 </div><!-- /app -->
-
+ 
 <!-- ══ DETAIL PANEL ══ -->
 <div id="detail-panel">
   <div class="dp-topbar">
@@ -359,13 +359,13 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
     <button id="dp-save-btn" class="btn-p" onclick="saveTask()"><span class="ms" style="font-size:15px">save</span>Salvar</button>
   </div>
   <div class="dp-content">
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">title</span>Nome <span style="color:#ba1a1a">*</span></div>
       <input id="dp-title" class="f-input" style="font-size:17px;font-weight:700;background:transparent;padding:0;border:none" placeholder="Título da tarefa..."/>
       <div class="f-err" id="dp-title-err">Obrigatório</div>
     </div>
-
+ 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
       <div class="dp-section">
         <div class="dp-label"><span class="ms" style="font-size:15px">flag</span>Status <span style="color:#ba1a1a">*</span></div>
@@ -380,24 +380,24 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
         </select>
       </div>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">label</span>Categoria <span style="color:#ba1a1a">*</span></div>
       <input id="dp-tag" class="f-input" placeholder="ex: Design, Dev, Marketing"/>
       <div class="f-err" id="dp-tag-err">Obrigatório</div>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">group</span>Responsáveis <span style="color:#ba1a1a">*</span></div>
       <div class="f-input" style="padding:5px 7px;height:auto"><div id="dp-assignees" class="a-list"></div></div>
       <div class="f-err" id="dp-assignees-err">Selecione ao menos um</div>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">notes</span>Descrição</div>
       <textarea id="dp-desc" class="f-input" rows="4" placeholder="Descrição detalhada..." style="resize:vertical"></textarea>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">trending_up</span>Progresso</div>
       <div style="display:flex;align-items:center;gap:11px">
@@ -406,7 +406,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       </div>
       <div class="prog-bar" style="margin-top:7px"><div id="dp-prog-bar" class="prog-fill" style="width:0%;background:#005faa"></div></div>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">calendar_today</span>Datas <span style="color:#ba1a1a">*</span></div>
       <div class="f-row">
@@ -429,7 +429,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
         <p id="db-label" style="font-size:11px;color:#717783;margin-top:3px;text-align:right"></p>
       </div>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label" style="display:flex;justify-content:space-between">
         <span><span class="ms" style="font-size:15px">checklist</span>Checklist</span>
@@ -438,7 +438,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       <div id="cl-items"></div>
       <button onclick="addChecklistItem()" class="add-col-btn" style="margin-top:7px"><span class="ms" style="font-size:15px">add</span>Adicionar item</button>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">attach_file</span>Anexos</div>
       <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()"
@@ -451,15 +451,15 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       <input type="file" id="file-input" multiple style="display:none" onchange="uploadFiles(this.files)"/>
       <div id="att-list" style="margin-top:8px"></div>
     </div>
-
+ 
     <div class="dp-section">
       <div class="dp-label"><span class="ms" style="font-size:15px">history</span>Atividade</div>
       <div id="dp-activity"></div>
     </div>
-
+ 
   </div>
 </div>
-
+ 
 <!-- ══ TASK MODAL ══ -->
 <div class="m-overlay" id="task-modal" onclick="closeTaskModal(event)">
   <div class="m-box" onclick="event.stopPropagation()">
@@ -514,7 +514,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
     </div>
   </div>
 </div>
-
+ 
 <!-- ══ PROJECT MODAL ══ -->
 <div class="m-overlay" id="proj-modal" onclick="closeProjModal(event)">
   <div class="m-box" onclick="event.stopPropagation()">
@@ -548,9 +548,9 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
     </div>
   </div>
 </div>
-
+ 
 <div id="toast"></div>
-
+ 
 <!-- ══════════════════════════════════════════
   JAVASCRIPT
 ══════════════════════════════════════════ -->
@@ -561,7 +561,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 const SUPABASE_URL = 'https://xnsxkabvvokkfoogezzr.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhuc3hrYWJ2dm9ra2Zvb2dlenpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5Njk3MTUsImV4cCI6MjA4NjU0NTcxNX0.eBrXhn9fDGG2_qmqynPADjeKdzGvJ06Hmu4NIm0QeQQ';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
+ 
 // ─────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────
@@ -578,7 +578,7 @@ const S = {
   unsaved: false,
   subs: [],            // realtime subscriptions
 };
-
+ 
 // ─────────────────────────────────────────
 //  AUTH
 // ─────────────────────────────────────────
@@ -590,7 +590,7 @@ async function loginEmail() {
   setBtnLoading('auth-btn', false);
   if (error) authErr(error.message);
 }
-
+ 
 async function loginGoogle() {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
@@ -598,7 +598,7 @@ async function loginGoogle() {
   });
   if (error) authErr(error.message);
 }
-
+ 
 function showRegister() {
   const email = v('au-email'), pass = v('au-pass');
   if (!email || !pass || pass.length < 6) { authErr('E-mail e senha (mín. 6 chars).'); return; }
@@ -609,29 +609,29 @@ function showRegister() {
     else toast('Confirme seu e-mail para ativar a conta.');
   });
 }
-
+ 
 async function doLogout() {
   S.subs.forEach(sub => sub.unsubscribe());
   S.subs = [];
   await sb.auth.signOut();
 }
-
+ 
 function authErr(msg) {
   const el = ge('auth-err');
   el.textContent = msg; el.style.display = 'block';
 }
-
+ 
 // Auth state listener
 // Auth state listener (Versão Corrigida)
 sb.auth.onAuthStateChange(async (event, session) => {
   console.log("Evento de Auth:", event);
-
+ 
   if (session?.user) {
     // 1. LIMPA A URL: Remove o access_token da barra de endereços para evitar loops
     if (window.location.hash || window.location.search.includes('access_token')) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-
+ 
     // 2. BUSCA O PERFIL
     let { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
     
@@ -651,7 +651,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
       const { data: retryProf } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
       prof = retryProf;
     }
-
+ 
     // 3. ATUALIZA O ESTADO E A INTERFACE
     // Se o perfil falhar, usamos os dados da sessão como "plano B" para não travar
     S.user = prof || { 
@@ -661,7 +661,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
       initials: '??', 
       role: 'user' 
     };
-
+ 
     ge('auth-screen').style.display = 'none';
     const appEl = ge('app');
     if (appEl) {
@@ -671,7 +671,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     
     // Inicia o carregamento dos projetos e tarefas
     initApp();
-
+ 
   } else {
     // Usuário deslogado
     ge('auth-screen').style.display = 'flex';
@@ -679,28 +679,31 @@ sb.auth.onAuthStateChange(async (event, session) => {
     S.user = null;
   }
 });
-
+ 
 // ─────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────
+let _appInited = false;
 async function initApp() {
+  if (_appInited) return;
+  _appInited = true;
   const u = S.user;
   ge('u-av').textContent = u.initials;
   ge('u-name').textContent = u.name;
   ge('u-email').textContent = u.email;
   ge('u-role').innerHTML = `Função: <span class="role-badge ${u.role}">${u.role}</span>`;
-
+ 
   // Load users list
   const { data: users } = await sb.from('profiles').select('*').order('name');
   S.users = users || [];
-
+ 
   // Viewer check
   const isViewer = u.role === 'viewer';
   if (isViewer) {
     ge('dp-del-btn').style.display = 'none';
     ge('dp-save-btn').style.display = 'none';
   }
-
+ 
   await loadProjects();
   await loadTasks();
   setupRealtime();
@@ -710,7 +713,7 @@ async function initApp() {
   window.addEventListener('online',  () => ge('offline-bar').style.display = 'none');
   window.addEventListener('offline', () => ge('offline-bar').style.display = 'block');
 }
-
+ 
 // ─────────────────────────────────────────
 //  DATA LOADERS
 // ─────────────────────────────────────────
@@ -725,7 +728,7 @@ async function loadProjects() {
   // Default project
   if (!S.currentProjId && S.projects.length) S.currentProjId = S.projects[0].id;
 }
-
+ 
 async function loadTasks() {
   if (!S.projects.length) { S.tasks = []; return; }
   const projIds = S.projects.map(p => p.id);
@@ -740,7 +743,7 @@ async function loadTasks() {
   const { data: atts } = await sb.from('attachments').select('*').in('task_id', taskIds).order('uploaded_at');
   // Activity
   const { data: act } = await sb.from('activity').select('*').in('task_id', taskIds).order('created_at', { ascending: false });
-
+ 
   S.tasks = tasks.map(t => ({
     ...t,
     assignees:  (assignees || []).filter(a => a.task_id === t.id).map(a => a.user_id),
@@ -749,7 +752,7 @@ async function loadTasks() {
     activity:   (act || []).filter(a => a.task_id === t.id),
   }));
 }
-
+ 
 // ─────────────────────────────────────────
 //  REALTIME
 // ─────────────────────────────────────────
@@ -762,7 +765,7 @@ function setupRealtime() {
     .subscribe();
   S.subs.push(sub);
 }
-
+ 
 let reloadTimer = null;
 async function reload(type) {
   clearTimeout(reloadTimer);
@@ -773,7 +776,7 @@ async function reload(type) {
     refreshView();
   }, 300);
 }
-
+ 
 // ─────────────────────────────────────────
 //  NAVIGATION
 // ─────────────────────────────────────────
@@ -791,9 +794,9 @@ function switchView(v) {
   if (v === 'calendar') renderCalendar();
   if (v === 'tasks')    renderTasksList();
 }
-
+ 
 function refreshView() { switchView(S.currentView || 'hub'); }
-
+ 
 // ─────────────────────────────────────────
 //  SIDEBAR
 // ─────────────────────────────────────────
@@ -803,7 +806,7 @@ function renderSidebar() {
       <div class="proj-dot" style="background:${p.color}"></div>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${esc(p.name)}</span>
     </div>`).join('');
-
+ 
   const sel = ge('tl-proj');
   if (sel) {
     const cur = sel.value;
@@ -811,9 +814,9 @@ function renderSidebar() {
     sel.value = cur;
   }
 }
-
+ 
 function openProj(id) { S.currentProjId = id; switchView('board'); }
-
+ 
 // ─────────────────────────────────────────
 //  HUB
 // ─────────────────────────────────────────
@@ -822,13 +825,13 @@ function renderHub() {
   const done = t.filter(x => x.status === 'done').length;
   const active = t.filter(x => x.status !== 'done').length;
   const overdue = t.filter(x => x.due_date && new Date(x.due_date) < new Date() && x.status !== 'done').length;
-
+ 
   ge('hub-stats').innerHTML = `
     <div class="stat-card"><div class="stat-val" style="color:#005faa">${active}</div><div class="stat-lbl">Ativas</div></div>
     <div class="stat-card"><div class="stat-val">${done}</div><div class="stat-lbl">Concluídas</div></div>
     <div class="stat-card"><div class="stat-val" style="color:#ba1a1a">${overdue}</div><div class="stat-lbl">Em Atraso</div></div>
     <div class="stat-card"><div class="stat-val" style="color:#456084">${S.projects.length}</div><div class="stat-lbl">Projetos</div></div>`;
-
+ 
   ge('hub-projects').innerHTML = S.projects.map(p => {
     const pt = t.filter(x => x.project_id === p.id);
     const pd = pt.filter(x => x.status === 'done').length;
@@ -854,7 +857,7 @@ function renderHub() {
     <div style="font-weight:700;font-size:13px">Novo Projeto</div>
   </div>`;
 }
-
+ 
 function buildAvatarStack(projId) {
   const proj = S.projects.find(p => p.id === projId);
   if (!proj) return '';
@@ -864,7 +867,7 @@ function buildAvatarStack(projId) {
     return u ? `<div class="av" style="background:${proj.color}20;color:${proj.color};width:22px;height:22px;font-size:8px">${u.initials}</div>` : '';
   }).join('');
 }
-
+ 
 // ─────────────────────────────────────────
 //  KANBAN BOARD
 // ─────────────────────────────────────────
@@ -874,18 +877,18 @@ const COLS = [
   { id:'review',     label:'Em Revisão',   accent:'#bc5b00' },
   { id:'done',       label:'Concluído',    accent:'#456084' },
 ];
-
+ 
 function renderBoard() {
   const proj = S.projects.find(p => p.id === S.currentProjId) || S.projects[0];
   if (!proj) { ge('board-cols').innerHTML = '<p style="color:#717783;padding:20px">Nenhum projeto. Crie um no Hub.</p>'; return; }
   S.currentProjId = proj.id;
   ge('b-breadcrumb').textContent = proj.category;
   ge('b-title').textContent = proj.name;
-
+ 
   const filtered = filteredTasks(proj.id);
   const el = ge('board-cols');
   el.innerHTML = '';
-
+ 
   COLS.forEach(col => {
     const cards = filtered.filter(t => t.status === col.id);
     const div = document.createElement('div');
@@ -905,11 +908,11 @@ function renderBoard() {
       </div>`;
     el.appendChild(div);
   });
-
+ 
   initDnD();
   updateFilterOpts(proj.id);
 }
-
+ 
 function buildCard(t) {
   const accentColor = { alta:'#bc5b00', baixa:'#adc8f2' }[t.priority] || null;
   const progColor = t.progress >= 75 ? '#456084' : t.progress >= 40 ? '#005faa' : '#bc5b00';
@@ -920,7 +923,7 @@ function buildCard(t) {
   }).join('');
   const doneItems = (t.checklist || []).filter(c => c.done).length;
   const totalItems = (t.checklist || []).length;
-
+ 
   return `<div class="k-card" data-id="${t.id}" draggable="true" onclick="openDetail('${t.id}')">
     ${accentColor ? `<div class="card-accent" style="background:${accentColor}"></div>` : ''}
     <div class="card-body" style="padding-left:${accentColor?'11px':'0'}">
@@ -943,12 +946,12 @@ function buildCard(t) {
     </div>
   </div>`;
 }
-
+ 
 function chipStyle(tag) {
   const m = {'UX DESIGN':'background:#d3e3ff;color:#004883','DESIGN':'background:#d3e3ff;color:#004883','DEV':'background:#adc8f2;color:#001c39','DESENVOLVIMENTO':'background:#adc8f2;color:#001c39','PESQUISA':'background:#e3e2e1;color:#404752','MARKETING':'background:#b8d3fd;color:#2d486b','INTERNO':'background:#d3e3ff;color:#004883','RELATÓRIO':'background:#ffdbc8;color:#743500'};
   return m[(tag||'').toUpperCase()] || 'background:#e3e2e1;color:#404752';
 }
-
+ 
 // ─────────────────────────────────────────
 //  DRAG & DROP
 // ─────────────────────────────────────────
@@ -995,7 +998,7 @@ function initDnD() {
     });
   });
 }
-
+ 
 function afterEl(container, y) {
   return [...container.querySelectorAll('.k-card:not(.dragging)')].reduce((cl, el) => {
     const b = el.getBoundingClientRect();
@@ -1003,7 +1006,7 @@ function afterEl(container, y) {
     return off < 0 && off > cl.offset ? { offset: off, el } : cl;
   }, { offset: Number.NEGATIVE_INFINITY }).el;
 }
-
+ 
 // ─────────────────────────────────────────
 //  FILTERS
 // ─────────────────────────────────────────
@@ -1018,36 +1021,36 @@ function filteredTasks(projId) {
     return true;
   });
 }
-
+ 
 function applyFilters() {
   S.filters.priority = ge('f-priority').value;
   S.filters.tag      = ge('f-tag').value;
   S.filters.assignee = ge('f-assignee').value;
   renderBoard();
 }
-
+ 
 function clearFilters() {
   S.filters = { priority:'', tag:'', assignee:'' };
   ['f-priority','f-tag','f-assignee'].forEach(id => { const el = ge(id); if (el) el.value = ''; });
   renderBoard();
 }
-
+ 
 function updateFilterOpts(projId) {
   const tags = [...new Set(S.tasks.filter(t => t.project_id === projId).map(t => t.tag).filter(Boolean))];
   const fTag = ge('f-tag');
   const cur  = fTag.value;
   fTag.innerHTML = '<option value="">Categoria</option>' + tags.map(t => `<option value="${t}">${t}</option>`).join('');
   fTag.value = cur;
-
+ 
   const fA  = ge('f-assignee');
   const curA = fA.value;
   fA.innerHTML = '<option value="">Responsável</option>' + S.users.map(u => `<option value="${u.id}">${esc(u.name)}</option>`).join('');
   fA.value = curA;
 }
-
+ 
 let srchTimer;
 function debouncedSearch() { clearTimeout(srchTimer); srchTimer = setTimeout(() => refreshView(), 260); }
-
+ 
 // ─────────────────────────────────────────
 //  TASK DETAIL
 // ─────────────────────────────────────────
@@ -1056,7 +1059,7 @@ function openDetail(id) {
   if (!t) return;
   S.currentTaskId = id;
   S.unsaved = false;
-
+ 
   ge('dp-title').value    = t.title;
   ge('dp-status').value   = t.status;
   ge('dp-priority').value = t.priority;
@@ -1067,34 +1070,34 @@ function openDetail(id) {
   ge('dp-prog').value     = t.progress || 0;
   ge('dp-prog-v').textContent = (t.progress || 0) + '%';
   ge('dp-prog-bar').style.width = (t.progress || 0) + '%';
-
+ 
   ['dp-title','dp-status','dp-priority','dp-tag','dp-desc','dp-start','dp-due','dp-prog'].forEach(id => {
     ge(id).oninput = () => S.unsaved = true;
   });
-
+ 
   renderAssignees('dp-assignees', t.assignees || []);
   renderChecklist(t);
   renderAttachments(t);
   renderActivity(t);
   renderDateBar();
-
+ 
   ge('detail-panel').classList.add('open');
 }
-
+ 
 function closeDetail() {
   if (S.unsaved && !confirm('Alterações não salvas. Descartar?')) return;
   ge('detail-panel').classList.remove('open');
   S.currentTaskId = null;
   S.unsaved = false;
 }
-
+ 
 async function saveTask() {
   const title    = ge('dp-title').value.trim();
   const tag      = ge('dp-tag').value.trim();
   const start    = ge('dp-start').value;
   const due      = ge('dp-due').value;
   const assignees = checkedAssignees('dp-assignees');
-
+ 
   let ok = true;
   setErr('dp-title', !title); if (!title) ok = false;
   setErr('dp-tag',   !tag);   if (!tag) ok = false;
@@ -1103,12 +1106,12 @@ async function saveTask() {
   setErr('dp-assignees', assignees.length === 0); if (!assignees.length) ok = false;
   if (!ok) { toast('Preencha todos os campos obrigatórios.'); return; }
   if (due < start) { setErr('dp-due', true); toast('Entrega deve ser após o início.'); return; }
-
+ 
   setBtnLoading('dp-save-btn', true);
   const id = S.currentTaskId;
   const old = S.tasks.find(t => t.id === id);
   const newStatus = ge('dp-status').value;
-
+ 
   await sb.from('tasks').update({
     title, tag: tag.toUpperCase(),
     status:      newStatus,
@@ -1118,24 +1121,24 @@ async function saveTask() {
     due_date:    due,
     progress:    parseInt(ge('dp-prog').value),
   }).eq('id', id);
-
+ 
   // Sync assignees
   await sb.from('task_assignees').delete().eq('task_id', id);
   if (assignees.length) {
     await sb.from('task_assignees').insert(assignees.map(uid => ({ task_id: id, user_id: uid })));
   }
-
+ 
   if (old?.status !== newStatus) {
     await logActivity(id, `alterou status para "${statusLbl(newStatus)}"`);
   }
-
+ 
   await reload('tasks');
   setBtnLoading('dp-save-btn', false);
   S.unsaved = false;
   toast('Tarefa salva!');
   ge('detail-panel').classList.remove('open');
 }
-
+ 
 async function deleteTask() {
   if (!confirm('Excluir esta tarefa permanentemente?')) return;
   await sb.from('tasks').delete().eq('id', S.currentTaskId);
@@ -1143,12 +1146,12 @@ async function deleteTask() {
   toast('Tarefa excluída.');
   await reload('tasks');
 }
-
+ 
 function confirmDel(id) {
   if (!confirm('Excluir esta tarefa?')) return;
   sb.from('tasks').delete().eq('id', id).then(() => { toast('Tarefa excluída.'); reload('tasks'); });
 }
-
+ 
 // ── ASSIGNEES ──
 function renderAssignees(containerId, selected = []) {
   ge(containerId).innerHTML = S.users.map(u => `
@@ -1159,11 +1162,11 @@ function renderAssignees(containerId, selected = []) {
       <span class="role-badge ${u.role}">${u.role}</span>
     </label>`).join('');
 }
-
+ 
 function checkedAssignees(containerId) {
   return [...document.querySelectorAll(`#${containerId} input:checked`)].map(el => el.value);
 }
-
+ 
 // ── CHECKLIST ──
 function renderChecklist(t) {
   const done = (t.checklist || []).filter(c => c.done).length;
@@ -1175,7 +1178,7 @@ function renderChecklist(t) {
       <button onclick="removeCheck('${item.id}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'"><span class="ms" style="font-size:14px">delete</span></button>
     </div>`).join('');
 }
-
+ 
 async function toggleCheck(itemId, done) {
   await sb.from('checklist_items').update({ done }).eq('id', itemId);
   const t = S.tasks.find(t => t.id === S.currentTaskId);
@@ -1184,13 +1187,13 @@ async function toggleCheck(itemId, done) {
   if (item) item.done = done;
   renderChecklist(t);
 }
-
+ 
 async function removeCheck(itemId) {
   await sb.from('checklist_items').delete().eq('id', itemId);
   const t = S.tasks.find(t => t.id === S.currentTaskId);
   if (t) { t.checklist = t.checklist.filter(c => c.id !== itemId); renderChecklist(t); }
 }
-
+ 
 async function addChecklistItem() {
   const text = prompt('Nome do item:');
   if (!text?.trim()) return;
@@ -1200,7 +1203,7 @@ async function addChecklistItem() {
   const { data } = await sb.from('checklist_items').insert({ task_id: S.currentTaskId, text: text.trim(), done: false, position: pos }).select().single();
   if (data) { t.checklist = [...(t.checklist || []), data]; renderChecklist(t); }
 }
-
+ 
 // ── DATE BAR ──
 function renderDateBar() {
   const start = ge('dp-start').value;
@@ -1218,7 +1221,7 @@ function renderDateBar() {
   ge('db-label').textContent = late ? `⚠ Atrasado ${Math.round((n - d) / 86400000)} dia(s)` : `${pct}% do tempo`;
   ge('db-label').style.color = late ? '#ba1a1a' : '#717783';
 }
-
+ 
 // ── ATTACHMENTS ──
 function renderAttachments(t) {
   ge('att-list').innerHTML = (t.attachments || []).map(a => `
@@ -1230,13 +1233,13 @@ function renderAttachments(t) {
       <button onclick="event.stopPropagation();delAttachment('${a.id}','${a.storage_path}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'"><span class="ms" style="font-size:14px">delete</span></button>
     </div>`).join('');
 }
-
+ 
 function handleFileDrop(e) {
   e.preventDefault();
   ge('upload-zone').classList.remove('drag-over');
   uploadFiles(e.dataTransfer.files);
 }
-
+ 
 async function uploadFiles(files) {
   const t = S.tasks.find(t => t.id === S.currentTaskId);
   if (!t) return;
@@ -1254,7 +1257,7 @@ async function uploadFiles(files) {
     toast(`${file.name} enviado!`);
   }
 }
-
+ 
 async function delAttachment(id, path) {
   if (!confirm('Excluir este anexo?')) return;
   await sb.storage.from('attachments').remove([path]);
@@ -1262,7 +1265,7 @@ async function delAttachment(id, path) {
   const t = S.tasks.find(t => t.id === S.currentTaskId);
   if (t) { t.attachments = t.attachments.filter(a => a.id !== id); renderAttachments(t); }
 }
-
+ 
 // ── ACTIVITY ──
 function renderActivity(t) {
   ge('dp-activity').innerHTML = (t.activity || []).length
@@ -1276,11 +1279,11 @@ function renderActivity(t) {
       </div>`).join('')
     : '<p style="font-size:12px;color:#717783">Sem atividade.</p>';
 }
-
+ 
 async function logActivity(taskId, action) {
   await sb.from('activity').insert({ task_id: taskId, user_id: S.user.id, user_name: S.user.name, action });
 }
-
+ 
 // ─────────────────────────────────────────
 //  TASK MODAL
 // ─────────────────────────────────────────
@@ -1298,19 +1301,19 @@ function openNewTaskModal(defaultStatus) {
   ge('task-modal').classList.add('open');
   setTimeout(() => ge('m-title').focus(), 80);
 }
-
+ 
 function closeTaskModal(e) {
   if (e && e.target !== ge('task-modal')) return;
   ge('task-modal').classList.remove('open');
 }
-
+ 
 async function submitTask() {
   const title    = ge('m-title').value.trim();
   const tag      = ge('m-tag').value.trim();
   const start    = ge('m-start').value;
   const due      = ge('m-due').value;
   const assignees = checkedAssignees('m-assignees');
-
+ 
   let ok = true;
   setErr('m-title', !title); if (!title) ok = false;
   setErr('m-tag',   !tag);   if (!tag) ok = false;
@@ -1319,10 +1322,10 @@ async function submitTask() {
   setErr('m-assignees', !assignees.length); if (!assignees.length) ok = false;
   if (!ok) { toast('Preencha todos os campos obrigatórios.'); return; }
   if (due < start) { setErr('m-due', true); toast('Entrega deve ser após o início.'); return; }
-
+ 
   const proj = S.projects.find(p => p.id === S.currentProjId) || S.projects[0];
   if (!proj) { toast('Selecione um projeto primeiro.'); return; }
-
+ 
   setBtnLoading('m-submit-btn', true);
   const { data: task, error } = await sb.from('tasks').insert({
     project_id: proj.id, title, tag: tag.toUpperCase(),
@@ -1330,9 +1333,9 @@ async function submitTask() {
     description: ge('m-desc').value, start_date: start, due_date: due,
     progress: 0, created_by: S.user.id,
   }).select().single();
-
+ 
   if (error || !task) { toast('Erro ao criar: ' + (error?.message||'?')); setBtnLoading('m-submit-btn', false); return; }
-
+ 
   if (assignees.length) {
     await sb.from('task_assignees').insert(assignees.map(uid => ({ task_id: task.id, user_id: uid })));
   }
@@ -1342,7 +1345,7 @@ async function submitTask() {
   ge('task-modal').classList.remove('open');
   toast('Tarefa criada!');
 }
-
+ 
 // ─────────────────────────────────────────
 //  PROJECT MODAL
 // ─────────────────────────────────────────
@@ -1356,12 +1359,12 @@ function openNewProjectModal() {
   ge('proj-modal').classList.add('open');
   setTimeout(() => ge('p-name').focus(), 80);
 }
-
+ 
 function closeProjModal(e) {
   if (e && e.target !== ge('proj-modal')) return;
   ge('proj-modal').classList.remove('open');
 }
-
+ 
 async function submitProject() {
   const name = ge('p-name').value.trim();
   const cat  = ge('p-cat').value.trim();
@@ -1369,7 +1372,7 @@ async function submitProject() {
   setErr('p-name', !name); if (!name) ok = false;
   setErr('p-cat',  !cat);  if (!cat) ok = false;
   if (!ok) return;
-
+ 
   setBtnLoading('p-submit-btn', true);
   const { data: proj, error } = await sb.from('projects').insert({
     name, category: cat.toUpperCase(),
@@ -1377,9 +1380,9 @@ async function submitProject() {
     due_date: ge('p-due').value || null,
     owner_id: S.user.id,
   }).select().single();
-
+ 
   if (error || !proj) { toast('Erro: ' + (error?.message||'?')); setBtnLoading('p-submit-btn', false); return; }
-
+ 
   // Add creator as member
   await sb.from('project_members').insert({ project_id: proj.id, user_id: S.user.id });
   await loadProjects();
@@ -1391,7 +1394,7 @@ async function submitProject() {
   toast('Projeto criado!');
   switchView('board');
 }
-
+ 
 // ─────────────────────────────────────────
 //  CALENDAR
 // ─────────────────────────────────────────
@@ -1414,7 +1417,7 @@ function renderCalendar() {
     </div>`;
   }
   ge('cal-grid').innerHTML = html;
-
+ 
   const mt = S.tasks.filter(t => { if (!t.due_date) return false; const td = new Date(t.due_date+'T00:00:00'); return td.getMonth()===m && td.getFullYear()===y; }).sort((a,b) => a.due_date.localeCompare(b.due_date));
   ge('cal-tasks').innerHTML = mt.map(t => {
     const ov = t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done';
@@ -1429,10 +1432,10 @@ function renderCalendar() {
     </div>`;
   }).join('') || '<p style="font-size:13px;color:#717783">Nenhuma tarefa neste mês.</p>';
 }
-
+ 
 function prevMonth() { S.calMonth--; if (S.calMonth<0){S.calMonth=11;S.calYear--;} renderCalendar(); }
 function nextMonth() { S.calMonth++; if (S.calMonth>11){S.calMonth=0;S.calYear++;} renderCalendar(); }
-
+ 
 // ─────────────────────────────────────────
 //  TASKS LIST
 // ─────────────────────────────────────────
@@ -1441,7 +1444,7 @@ function renderTasksList() {
   const priority = ge('tl-priority')?.value || '';
   const projId   = ge('tl-proj')?.value || '';
   const q        = (ge('g-search')?.value || '').toLowerCase();
-
+ 
   let tasks = S.tasks.filter(t => {
     if (status && t.status !== status) return false;
     if (priority && t.priority !== priority) return false;
@@ -1449,9 +1452,9 @@ function renderTasksList() {
     if (q && !t.title.toLowerCase().includes(q) && !(t.description||'').toLowerCase().includes(q)) return false;
     return true;
   });
-
+ 
   if (S.user.role === 'viewer') tasks = tasks.filter(t => (t.assignees||[]).includes(S.user.id));
-
+ 
   ge('tasks-list').innerHTML = tasks.map(t => {
     const proj = S.projects.find(p => p.id === t.project_id);
     const ov = t.due_date && new Date(t.due_date) < new Date() && t.status !== 'done';
@@ -1477,7 +1480,7 @@ function renderTasksList() {
     </div>`;
   }).join('') || '<p style="color:#717783;font-size:13px;padding:16px 0">Nenhuma tarefa encontrada.</p>';
 }
-
+ 
 // ─────────────────────────────────────────
 //  KEYBOARD SHORTCUTS
 // ─────────────────────────────────────────
@@ -1496,7 +1499,7 @@ function handleKeys(e) {
     if (e.key === 'p') { e.preventDefault(); openNewProjectModal(); }
   }
 }
-
+ 
 // ─────────────────────────────────────────
 //  USER MENU
 // ─────────────────────────────────────────
@@ -1509,14 +1512,14 @@ document.addEventListener('click', e => {
     if (ge('u-dd')) ge('u-dd').style.display = 'none';
   }
 });
-
+ 
 // ─────────────────────────────────────────
 //  UTILS
 // ─────────────────────────────────────────
 function statusLbl(s) { return {todo:'A Fazer',inprogress:'Em Andamento',review:'Em Revisão',done:'Concluído'}[s]||s; }
 function statusBg(s)  { return {todo:'#f4f3f2',inprogress:'#d3e3ff',review:'#ffdbc8',done:'#e3e2e1'}[s]||'#f4f3f2'; }
 function statusFg(s)  { return {todo:'#404752',inprogress:'#004883',review:'#743500',done:'#717783'}[s]||'#404752'; }
-
+ 
 function fmtDate(d) {
   if (!d) return '';
   const dt = new Date(d + 'T00:00:00');
@@ -1527,101 +1530,41 @@ function fmtDate(d) {
   if (dt.toDateString() === tom.toDateString()) return 'Amanhã';
   return `${dt.getDate()} ${MO[dt.getMonth()]}`;
 }
-
+ 
 function fmtTs(ts) {
   if (!ts) return '';
   try { return new Intl.RelativeTimeFormat('pt-BR', { numeric:'auto' }).format(-Math.round((Date.now()-new Date(ts).getTime())/60000), 'minute').replace('há ', 'há '); } catch { return ''; }
 }
-
+ 
 function setErr(id, has) {
   const el = ge(id); const er = ge(id+'-err');
   el?.classList[has?'add':'remove']('err');
   if (er) er.style.display = has ? 'block' : 'none';
 }
-
+ 
 function setBtnLoading(id, loading) {
   const btn = ge(id);
   if (!btn) return;
-  btn.disabled = loading;
-  if (loading) btn.innerHTML = `<div class="spinner"></div>`;
+  if (loading) {
+    btn._originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<div class="spinner"></div>`;
+  } else {
+    btn.disabled = false;
+    if (btn._originalHTML) btn.innerHTML = btn._originalHTML;
+  }
 }
-
+ 
 function toast(msg) {
   const el = ge('toast');
   el.textContent = msg; el.classList.add('show');
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2600);
 }
-
+ 
 function ge(id)  { return document.getElementById(id); }
 function v(id)   { return ge(id)?.value?.trim() || ''; }
 function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-// ============================================================
-//  BLOCO ÚNICO DE INICIALIZAÇÃO E NAVEGAÇÃO (CORRIGIDO)
-// ============================================================
-
-// 1. Função central para alternar entre Login e App
-function alternarTelas(session) {
-    const loginScreen = document.getElementById('login-screen');
-    const appContainer = document.getElementById('app-container');
-    const userNameDisplay = document.getElementById('userName');
-
-    if (session && session.user) {
-        console.log("Sessão ativa:", session.user.email);
-        
-        // Esconde login e mostra o App
-        if (loginScreen) loginScreen.classList.add('hidden');
-        if (appContainer) appContainer.classList.remove('hidden');
-        
-        // Atualiza o nome do usuário
-        if (userNameDisplay) userNameDisplay.textContent = session.user.email;
-
-        // Limpa o token da URL (deixa a barra de endereços limpa)
-        if (window.location.hash || window.location.search.includes('access_token')) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
-        // Carrega os dados do banco sem travar a tela
-        if (typeof loadData === 'function') {
-            loadData().catch(err => console.error("Erro ao carregar dados:", err));
-        }
-    } else {
-        console.log("Nenhum usuário logado.");
-        if (loginScreen) loginScreen.classList.remove('hidden');
-        if (appContainer) appContainer.classList.add('hidden');
-    }
-}
-
-// 2. Ouvinte de eventos do Supabase (Login/Logout/Google Redirect)
-supabase.auth.onAuthStateChange((event, session) => {
-    console.log("Evento Supabase:", event);
-    
-    // Se o usuário entrou ou a sessão foi recuperada
-    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
-        alternarTelas(session);
-    }
-    
-    // Se o usuário saiu
-    if (event === 'SIGNED_OUT') {
-        alternarTelas(null);
-    }
-});
-
-// 3. Verificação inicial (ao abrir a página ou dar F5)
-async function iniciarApp() {
-    try {
-        const { data: { session } } = await supabase.auth.getSession();
-        alternarTelas(session);
-    } catch (error) {
-        console.error("Erro ao verificar sessão inicial:", error);
-    }
-}
-
-// Executa assim que o navegador terminar de carregar o HTML
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', iniciarApp);
-} else {
-    iniciarApp();
-}
+// (bloco duplicado de auth removido — o listener principal já está acima)
 </script>
 </body>
 </html>
