@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <style>
+    .hidden { display: none !important; }
+</style>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Central de Tarefas</title>
@@ -1520,6 +1523,41 @@ function toast(msg) {
 function ge(id)  { return document.getElementById(id); }
 function v(id)   { return ge(id)?.value?.trim() || ''; }
 function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  // --- NOVO BLOCO DE INICIALIZAÇÃO ---
+
+// 1. Função para trocar as telas (Login <-> Painel)
+function gerenciarTelas(user) {
+    const telaLogin = document.getElementById('login-screen');
+    const painelApp = document.getElementById('app-container');
+    const displayNome = document.getElementById('userName');
+
+    if (user) {
+        if (telaLogin) telaLogin.classList.add('hidden');
+        if (painelApp) painelApp.classList.remove('hidden');
+        if (displayNome) displayNome.textContent = user.email;
+        
+        console.log("Usuário detectado, carregando dados...");
+        if (typeof loadData === 'function') loadData(); 
+    } else {
+        if (telaLogin) telaLogin.classList.remove('hidden');
+        if (painelApp) painelApp.classList.add('hidden');
+    }
+}
+
+// 2. Escuta o login do Google e E-mail
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Mudança de Auth detectada:", event);
+    gerenciarTelas(session?.user || null);
+});
+
+// 3. Verifica se você já está logado ao abrir a página
+async function verificarSessao() {
+    const { data: { session } } = await supabase.auth.getSession();
+    gerenciarTelas(session?.user || null);
+}
+
+// Rodar ao carregar
+verificarSessao();
 </script>
 </body>
 </html>
