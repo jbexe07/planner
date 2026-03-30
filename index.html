@@ -644,24 +644,35 @@ async function doRegister() {
   if (!email) { authErr('Preencha o e-mail.'); return; }
   if (!pass || pass.length < 6) { authErr('A senha deve ter pelo menos 6 caracteres.'); return; }
   if (pass !== pass2) { authErr('As senhas não coincidem.'); return; }
+
   setBtnLoading('auth-btn', true);
-  const { error } = await sb.auth.signUp({
+  const { data, error } = await sb.auth.signUp({
     email, password: pass,
     options: { data: { full_name: name } }
   });
   setBtnLoading('auth-btn', false);
+
   if (error) {
     authErr(error.message === 'User already registered'
       ? 'Este e-mail já está cadastrado. Faça login.' : error.message);
-  } else {
-    ge('auth-err').style.display = 'none';
-    // Mostra mensagem de sucesso no lugar do formulário
-    ge('auth-err').style.background = '#d3e3ff';
-    ge('auth-err').style.color = '#004883';
-    ge('auth-err').textContent = '✓ Conta criada! Verifique seu e-mail para ativar o acesso.';
-    ge('auth-err').style.display = 'block';
-    toggleAuthMode(); // volta para login
+    return;
   }
+
+  // Se confirmação de e-mail está DESLIGADA, o Supabase já faz login automático
+  // e o onAuthStateChange cuida de abrir o app — não precisamos fazer nada aqui.
+  // Se confirmação está LIGADA, mostramos a mensagem e voltamos para o login.
+  if (data?.session) {
+    // Login automático — o listener vai cuidar do resto
+    return;
+  }
+
+  // Sem sessão = confirmação pendente
+  const err = ge('auth-err');
+  err.style.background = '#d3e3ff';
+  err.style.color = '#004883';
+  err.textContent = '✓ Conta criada! Verifique seu e-mail para ativar o acesso.';
+  err.style.display = 'block';
+  toggleAuthMode();
 }
 
 async function loginGoogle() {
@@ -737,10 +748,14 @@ sb.auth.onAuthStateChange(async (event, session) => {
     initApp();
  
   } else {
-    // Usuário deslogado
+    // Usuário deslogado — reseta tudo para permitir novo login
     ge('auth-screen').style.display = 'flex';
     ge('app').style.display = 'none';
     S.user = null;
+    _appInited = false;
+    S.subs.forEach(sub => { try { sub.unsubscribe(); } catch(e){} });
+    S.subs = [];
+    S.projects = []; S.tasks = []; S.users = [];
   }
 });
  
