@@ -1558,6 +1558,50 @@ async function verificarSessao() {
 
 // Rodar ao carregar
 verificarSessao();
+  // --- CORREÇÃO DE FLUXO DE TELAS ---
+
+function gerenciarNavegacao(user) {
+    const loginScreen = document.getElementById('login-screen');
+    const appContainer = document.getElementById('app-container');
+    const userEmail = document.getElementById('user-email'); // Verifique se este ID existe ou use o que tiver para o nome
+
+    if (user) {
+        console.log("Usuário logado:", user.email);
+        loginScreen.classList.add('hidden');
+        appContainer.classList.remove('hidden');
+        
+        // Se houver um local para exibir o e-mail:
+        const display = document.querySelector('.user-info span') || document.getElementById('userName');
+        if (display) display.textContent = user.email;
+
+        // Tenta carregar os dados do banco
+        if (typeof loadData === 'function') {
+            loadData();
+        }
+    } else {
+        loginScreen.classList.remove('hidden');
+        appContainer.classList.add('hidden');
+    }
+}
+
+// Escuta o retorno do Google e outros logins
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Evento Auth:", event);
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        gerenciarNavegacao(session?.user);
+    }
+    if (event === 'SIGNED_OUT') {
+        gerenciarNavegacao(null);
+    }
+});
+
+// Verifica se já está logado ao dar F5
+async function checarSessao() {
+    const { data: { session } } = await supabase.auth.getSession();
+    gerenciarNavegacao(session?.user);
+}
+
+checarSessao();
 </script>
 </body>
 </html>
