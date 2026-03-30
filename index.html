@@ -802,9 +802,12 @@ function refreshView() { switchView(S.currentView || 'hub'); }
 // ─────────────────────────────────────────
 function renderSidebar() {
   ge('sb-projects').innerHTML = S.projects.map(p => `
-    <div class="s-item ${S.currentProjId===p.id && S.currentView==='board' ? 'active' : ''}" onclick="openProj('${p.id}')">
+    <div class="s-item ${S.currentProjId===p.id && S.currentView==='board' ? 'active' : ''}" onclick="openProj('${p.id}')" style="padding-right:4px">
       <div class="proj-dot" style="background:${p.color}"></div>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${esc(p.name)}</span>
+      <button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#717783;padding:2px 3px;border-radius:5px;opacity:0.4;flex-shrink:0;display:flex;align-items:center" title="Excluir projeto" onmouseover="this.style.opacity=1;this.style.color='#ba1a1a'" onmouseout="this.style.opacity=0.4;this.style.color='#717783'">
+        <span class="ms" style="font-size:14px">delete</span>
+      </button>
     </div>`).join('');
  
   const sel = ge('tl-proj');
@@ -815,6 +818,30 @@ function renderSidebar() {
   }
 }
  
+async function deleteProject(id) {
+  const proj = S.projects.find(p => p.id === id);
+  if (!proj) return;
+  if (!confirm(`Excluir o projeto "${proj.name}" e todas as suas tarefas? Essa ação não pode ser desfeita.`)) return;
+  // Deleta tarefas, membros e projeto (cascade cuida do resto no banco)
+  const taskIds = S.tasks.filter(t => t.project_id === id).map(t => t.id);
+  if (taskIds.length) {
+    await sb.from('activity').delete().in('task_id', taskIds);
+    await sb.from('checklist_items').delete().in('task_id', taskIds);
+    await sb.from('task_assignees').delete().in('task_id', taskIds);
+    await sb.from('attachments').delete().in('task_id', taskIds);
+    await sb.from('tasks').delete().eq('project_id', id);
+  }
+  await sb.from('project_members').delete().eq('project_id', id);
+  const { error } = await sb.from('projects').delete().eq('id', id);
+  if (error) { toast('Erro ao excluir: ' + error.message); return; }
+  S.projects = S.projects.filter(p => p.id !== id);
+  S.tasks    = S.tasks.filter(t => t.project_id !== id);
+  if (S.currentProjId === id) S.currentProjId = S.projects[0]?.id || null;
+  renderSidebar();
+  toast('Projeto excluído.');
+  switchView('hub');
+}
+
 function openProj(id) { S.currentProjId = id; switchView('board'); }
  
 // ─────────────────────────────────────────
@@ -840,7 +867,12 @@ function renderHub() {
     return `<div class="proj-card" onclick="openProj('${p.id}')">
       <div class="proj-accent" style="background:${p.color}"></div>
       <div class="proj-body">
-        <div style="margin-bottom:7px"><span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:${p.color}18;color:${p.color}">${esc(p.category)}</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
+          <span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:${p.color}18;color:${p.color}">${esc(p.category)}</span>
+          <button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px 4px;border-radius:7px;display:flex;align-items:center;transition:color .15s" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'" title="Excluir projeto">
+            <span class="ms" style="font-size:16px">delete</span>
+          </button>
+        </div>
         <div style="font-size:15px;font-weight:800;margin-bottom:2px">${esc(p.name)}</div>
         <div style="font-size:11px;color:#717783">${pt.length} tarefas · ${pd} concluídas</div>
         <div class="prog-bar-thin"><div class="prog-fill-thin" style="width:${prog}%;background:${p.color}"></div></div>
