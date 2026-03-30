@@ -1602,6 +1602,52 @@ async function checarSessao() {
 }
 
 checarSessao();
+  // 1. Função que realmente troca as telas
+function atualizarInterface(session) {
+    const loginScreen = document.getElementById('login-screen');
+    const appContainer = document.getElementById('app-container');
+
+    if (session) {
+        console.log("Sessão ativa encontrada para:", session.user.email);
+        loginScreen.classList.add('hidden');
+        appContainer.classList.remove('hidden');
+        
+        // Limpa a URL (remove o token poluído da barra de endereços)
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Atualiza o nome do usuário se o elemento existir
+        const nameDisplay = document.getElementById('userName');
+        if (nameDisplay) nameDisplay.textContent = session.user.email;
+
+        // Carrega os dados do banco
+        if (typeof loadData === 'function') loadData();
+    } else {
+        loginScreen.classList.remove('hidden');
+        appContainer.classList.add('hidden');
+    }
+}
+
+// 2. OUVINTE DE MUDANÇA (É aqui que a mágica do Google acontece)
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Evento Supabase detectado:", event);
+    
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        atualizarInterface(session);
+    }
+    if (event === 'SIGNED_OUT') {
+        atualizarInterface(null);
+    }
+});
+
+// 3. VERIFICAÇÃO AO CARREGAR (Para quando você der F5)
+async function verificarNoInicio() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (session) {
+        atualizarInterface(session);
+    }
+}
+
+verificarNoInicio();
 </script>
 </body>
 </html>
