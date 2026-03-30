@@ -622,26 +622,58 @@ function authErr(msg) {
 }
 
 // Auth state listener
+// Auth state listener (Versão Corrigida)
 sb.auth.onAuthStateChange(async (event, session) => {
+  console.log("Evento de Auth:", event);
+
   if (session?.user) {
-    // Load or upsert profile
+    // 1. LIMPA A URL: Remove o access_token da barra de endereços para evitar loops
+    if (window.location.hash || window.location.search.includes('access_token')) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // 2. BUSCA O PERFIL
     let { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+    
     if (!prof) {
       const meta = session.user.user_metadata;
-      const name = meta?.full_name || session.user.email.split('@')[0];
+      const name = meta?.full_name || meta?.name || session.user.email.split('@')[0];
+      
+      // Tenta criar o perfil se não existir
       await sb.from('profiles').upsert({
-        id: session.user.id, email: session.user.email,
-        name, initials: name.slice(0,2).toUpperCase(), role: 'user'
+        id: session.user.id, 
+        email: session.user.email,
+        name, 
+        initials: name.slice(0,2).toUpperCase(), 
+        role: 'user'
       });
-      const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-      prof = data;
+      
+      const { data: retryProf } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+      prof = retryProf;
     }
-    S.user = prof;
+
+    // 3. ATUALIZA O ESTADO E A INTERFACE
+    // Se o perfil falhar, usamos os dados da sessão como "plano B" para não travar
+    S.user = prof || { 
+      id: session.user.id, 
+      email: session.user.email, 
+      name: session.user.email.split('@')[0], 
+      initials: '??', 
+      role: 'user' 
+    };
+
     ge('auth-screen').style.display = 'none';
-    ge('app').style.display = 'flex';
-    ge('app').style.flexDirection = 'column';
+    const appEl = ge('app');
+    if (appEl) {
+        appEl.style.display = 'flex';
+        appEl.style.flexDirection = 'column';
+    }
+    
+    // Inicia o carregamento dos projetos e tarefas
     initApp();
+
   } else {
+    // Usuário deslogado
     ge('auth-screen').style.display = 'flex';
     ge('app').style.display = 'none';
     S.user = null;
