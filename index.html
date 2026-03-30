@@ -1523,170 +1523,73 @@ function toast(msg) {
 function ge(id)  { return document.getElementById(id); }
 function v(id)   { return ge(id)?.value?.trim() || ''; }
 function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  // --- NOVO BLOCO DE INICIALIZAÇÃO ---
+// ============================================================
+//  BLOCO ÚNICO DE INICIALIZAÇÃO E NAVEGAÇÃO (CORRIGIDO)
+// ============================================================
 
-// 1. Função para trocar as telas (Login <-> Painel)
-function gerenciarTelas(user) {
-    const telaLogin = document.getElementById('login-screen');
-    const painelApp = document.getElementById('app-container');
-    const displayNome = document.getElementById('userName');
-
-    if (user) {
-        if (telaLogin) telaLogin.classList.add('hidden');
-        if (painelApp) painelApp.classList.remove('hidden');
-        if (displayNome) displayNome.textContent = user.email;
-        
-        console.log("Usuário detectado, carregando dados...");
-        if (typeof loadData === 'function') loadData(); 
-    } else {
-        if (telaLogin) telaLogin.classList.remove('hidden');
-        if (painelApp) painelApp.classList.add('hidden');
-    }
-}
-
-// 2. Escuta o login do Google e E-mail
-supabase.auth.onAuthStateChange((event, session) => {
-    console.log("Mudança de Auth detectada:", event);
-    gerenciarTelas(session?.user || null);
-});
-
-// 3. Verifica se você já está logado ao abrir a página
-async function verificarSessao() {
-    const { data: { session } } = await supabase.auth.getSession();
-    gerenciarTelas(session?.user || null);
-}
-
-// Rodar ao carregar
-verificarSessao();
-  // --- CORREÇÃO DE FLUXO DE TELAS ---
-
-function gerenciarNavegacao(user) {
+// 1. Função central para alternar entre Login e App
+function alternarTelas(session) {
     const loginScreen = document.getElementById('login-screen');
     const appContainer = document.getElementById('app-container');
-    const userEmail = document.getElementById('user-email'); // Verifique se este ID existe ou use o que tiver para o nome
+    const userNameDisplay = document.getElementById('userName');
 
-    if (user) {
-        console.log("Usuário logado:", user.email);
-        loginScreen.classList.add('hidden');
-        appContainer.classList.remove('hidden');
+    if (session && session.user) {
+        console.log("Sessão ativa:", session.user.email);
         
-        // Se houver um local para exibir o e-mail:
-        const display = document.querySelector('.user-info span') || document.getElementById('userName');
-        if (display) display.textContent = user.email;
-
-        // Tenta carregar os dados do banco
-        if (typeof loadData === 'function') {
-            loadData();
-        }
-    } else {
-        loginScreen.classList.remove('hidden');
-        appContainer.classList.add('hidden');
-    }
-}
-
-// Escuta o retorno do Google e outros logins
-supabase.auth.onAuthStateChange((event, session) => {
-    console.log("Evento Auth:", event);
-    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        gerenciarNavegacao(session?.user);
-    }
-    if (event === 'SIGNED_OUT') {
-        gerenciarNavegacao(null);
-    }
-});
-
-// Verifica se já está logado ao dar F5
-async function checarSessao() {
-    const { data: { session } } = await supabase.auth.getSession();
-    gerenciarNavegacao(session?.user);
-}
-
-checarSessao();
-  // 1. Função que realmente troca as telas
-function atualizarInterface(session) {
-    const loginScreen = document.getElementById('login-screen');
-    const appContainer = document.getElementById('app-container');
-
-    if (session) {
-        console.log("Sessão ativa encontrada para:", session.user.email);
-        loginScreen.classList.add('hidden');
-        appContainer.classList.remove('hidden');
+        // Esconde login e mostra o App
+        if (loginScreen) loginScreen.classList.add('hidden');
+        if (appContainer) appContainer.classList.remove('hidden');
         
-        // Limpa a URL (remove o token poluído da barra de endereços)
-        window.history.replaceState({}, document.title, window.location.pathname);
-        
-        // Atualiza o nome do usuário se o elemento existir
-        const nameDisplay = document.getElementById('userName');
-        if (nameDisplay) nameDisplay.textContent = session.user.email;
+        // Atualiza o nome do usuário
+        if (userNameDisplay) userNameDisplay.textContent = session.user.email;
 
-        // Carrega os dados do banco
-        if (typeof loadData === 'function') loadData();
-    } else {
-        loginScreen.classList.remove('hidden');
-        appContainer.classList.add('hidden');
-    }
-}
-
-// 2. OUVINTE DE MUDANÇA (É aqui que a mágica do Google acontece)
-supabase.auth.onAuthStateChange((event, session) => {
-    console.log("Evento Supabase detectado:", event);
-    
-    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        atualizarInterface(session);
-    }
-    if (event === 'SIGNED_OUT') {
-        atualizarInterface(null);
-    }
-});
-
-// 3. VERIFICAÇÃO AO CARREGAR (Para quando você der F5)
-async function verificarNoInicio() {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (session) {
-        atualizarInterface(session);
-    }
-}
-
-verificarNoInicio();
-  async function init() {
-    console.log("Iniciando verificação de sessão...");
-    try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) throw error;
-
-        if (session) {
-            console.log("Sessão confirmada:", session.user.email);
-            
-            // 1. Limpa a URL IMEDIATAMENTE (tira aquele monte de letras da barra)
+        // Limpa o token da URL (deixa a barra de endereços limpa)
+        if (window.location.hash || window.location.search.includes('access_token')) {
             window.history.replaceState({}, document.title, window.location.pathname);
-            
-            // 2. Troca as telas usando os IDs CORRETOS do seu HTML
-            const loginScreen = document.getElementById('login-screen');
-            const appContainer = document.getElementById('app-container');
-            
-            if (loginScreen) loginScreen.classList.add('hidden');
-            if (appContainer) appContainer.classList.remove('hidden');
-            
-            // 3. Tenta carregar os dados, mas não trava se der erro
-            try {
-                if (typeof loadData === 'function') {
-                    await loadData(); 
-                }
-            } catch (dbError) {
-                console.error("Erro ao carregar dados do banco:", dbError);
-            }
-
-        } else {
-            console.log("Nenhum usuário logado.");
         }
-    } catch (err) {
-        console.error("Erro crítico na inicialização:", err);
+
+        // Carrega os dados do banco sem travar a tela
+        if (typeof loadData === 'function') {
+            loadData().catch(err => console.error("Erro ao carregar dados:", err));
+        }
+    } else {
+        console.log("Nenhum usuário logado.");
+        if (loginScreen) loginScreen.classList.remove('hidden');
+        if (appContainer) appContainer.classList.add('hidden');
     }
 }
 
-// Garante que a função rode ao carregar a página
-document.addEventListener('DOMContentLoaded', init);
+// 2. Ouvinte de eventos do Supabase (Login/Logout/Google Redirect)
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log("Evento Supabase:", event);
+    
+    // Se o usuário entrou ou a sessão foi recuperada
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
+        alternarTelas(session);
+    }
+    
+    // Se o usuário saiu
+    if (event === 'SIGNED_OUT') {
+        alternarTelas(null);
+    }
+});
+
+// 3. Verificação inicial (ao abrir a página ou dar F5)
+async function iniciarApp() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        alternarTelas(session);
+    } catch (error) {
+        console.error("Erro ao verificar sessão inicial:", error);
+    }
+}
+
+// Executa assim que o navegador terminar de carregar o HTML
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciarApp);
+} else {
+    iniciarApp();
+}
 </script>
 </body>
 </html>
