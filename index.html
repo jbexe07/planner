@@ -1648,6 +1648,45 @@ async function verificarNoInicio() {
 }
 
 verificarNoInicio();
+  async function init() {
+    console.log("Iniciando verificação de sessão...");
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) throw error;
+
+        if (session) {
+            console.log("Sessão confirmada:", session.user.email);
+            
+            // 1. Limpa a URL IMEDIATAMENTE (tira aquele monte de letras da barra)
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // 2. Troca as telas usando os IDs CORRETOS do seu HTML
+            const loginScreen = document.getElementById('login-screen');
+            const appContainer = document.getElementById('app-container');
+            
+            if (loginScreen) loginScreen.classList.add('hidden');
+            if (appContainer) appContainer.classList.remove('hidden');
+            
+            // 3. Tenta carregar os dados, mas não trava se der erro
+            try {
+                if (typeof loadData === 'function') {
+                    await loadData(); 
+                }
+            } catch (dbError) {
+                console.error("Erro ao carregar dados do banco:", dbError);
+            }
+
+        } else {
+            console.log("Nenhum usuário logado.");
+        }
+    } catch (err) {
+        console.error("Erro crítico na inicialização:", err);
+    }
+}
+
+// Garante que a função rode ao carregar a página
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
