@@ -696,73 +696,77 @@ function authErr(msg) {
   el.textContent = msg; el.style.display = 'block';
 }
  
-// Auth state listener
-// Auth state listener (Versão Corrigida)
-sb.auth.onAuthStateChange(async (event, session) => {
-  console.log("Evento de Auth:", event);
- 
-  if (session?.user) {
-    // 1. LIMPA A URL: Remove o access_token da barra de endereços para evitar loops
-    if (window.location.hash || window.location.search.includes('access_token')) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
- 
-    // 2. BUSCA O PERFIL
-    let { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-    
-    if (!prof) {
-      const meta = session.user.user_metadata;
-      const name = meta?.full_name || meta?.name || session.user.email.split('@')[0];
-      
-      // Tenta criar o perfil se não existir
-      await sb.from('profiles').upsert({
-        id: session.user.id, 
-        email: session.user.email,
-        name, 
-        initials: name.slice(0,2).toUpperCase(), 
-        role: 'user'
-      });
-      
-      const { data: retryProf } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-      prof = retryProf;
-    }
- 
-    // 3. ATUALIZA O ESTADO E A INTERFACE
-    // Se o perfil falhar, usamos os dados da sessão como "plano B" para não travar
-    S.user = prof || { 
-      id: session.user.id, 
-      email: session.user.email, 
-      name: session.user.email.split('@')[0], 
-      initials: '??', 
-      role: 'user' 
-    };
- 
-    ge('auth-screen').style.display = 'none';
-    const appEl = ge('app');
-    if (appEl) {
-        appEl.style.display = 'flex';
-        appEl.style.flexDirection = 'column';
-    }
-    
-    // Inicia o carregamento dos projetos e tarefas
-    initApp();
- 
-  } else {
-    // Usuário deslogado — reseta tudo para permitir novo login
-    ge('auth-screen').style.display = 'flex';
-    ge('app').style.display = 'none';
-    S.user = null;
+// ─────────────────────────────────────────
+//  AUTH STATE LISTENER
+// ─────────────────────────────────────────
+let _authTimer = null;
+let _appInited = false;
+
+sb.auth.onAuthStateChange((event, session) => {
+  // Debounce: ignora disparos duplicados em menos de 400ms
+  clearTimeout(_authTimer);
+  _authTimer = setTimeout(() => handleAuthChange(event, session), 400);
+});
+
+async function handleAuthChange(event, session) {
+  if (event === 'SIGNED_OUT' || !session?.user) {
+    // Reset completo
     _appInited = false;
+    S.user = null;
+    S.projects = []; S.tasks = []; S.users = [];
     S.subs.forEach(sub => { try { sub.unsubscribe(); } catch(e){} });
     S.subs = [];
-    S.projects = []; S.tasks = []; S.users = [];
+    ge('auth-screen').style.display = 'flex';
+    ge('app').style.display = 'none';
+    // Reseta erro de auth para azul (pode ter ficado de cadastro)
+    const err = ge('auth-err');
+    err.style.background = '#ffdad6';
+    err.style.color = '#ba1a1a';
+    return;
   }
-});
- 
+
+  // Se já iniciou com este usuário, ignora
+  if (_appInited && S.user?.id === session.user.id) return;
+
+  // Limpa token da URL
+  if (window.location.hash || window.location.search.includes('access_token')) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  // Busca ou cria perfil
+  let { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+  if (!prof) {
+    const meta = session.user.user_metadata;
+    const name = meta?.full_name || meta?.name || session.user.email.split('@')[0];
+    await sb.from('profiles').upsert({
+      id: session.user.id,
+      email: session.user.email,
+      name,
+      initials: name.slice(0,2).toUpperCase(),
+      role: 'user'
+    });
+    const { data: retry } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+    prof = retry;
+  }
+
+  S.user = prof || {
+    id: session.user.id,
+    email: session.user.email,
+    name: session.user.email.split('@')[0],
+    initials: '??',
+    role: 'user'
+  };
+
+  ge('auth-screen').style.display = 'none';
+  ge('app').style.display = 'flex';
+  ge('app').style.flexDirection = 'column';
+
+  initApp();
+}
+
 // ─────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────
-let _appInited = false;
 async function initApp() {
   if (_appInited) return;
   _appInited = true;
