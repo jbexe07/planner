@@ -266,10 +266,18 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
     <button class="btn-i" onclick="openNewProjectModal()" title="Novo Projeto (P)"><span class="ms">create_new_folder</span></button>
     <div style="position:relative">
       <div id="u-av" style="width:32px;height:32px;border-radius:999px;background:#d3e3ff;color:#004883;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:4px" onclick="toggleUserMenu()">--</div>
-      <div id="u-dd" style="display:none;position:absolute;top:38px;right:0;background:#fff;border-radius:13px;box-shadow:0 8px 30px rgba(26,28,28,.13);padding:7px;min-width:175px;z-index:200">
+      <div id="u-dd" style="display:none;position:absolute;top:38px;right:0;background:#fff;border-radius:13px;box-shadow:0 8px 30px rgba(26,28,28,.13);padding:7px;min-width:190px;z-index:200">
         <div id="u-name" style="padding:7px 11px;font-size:13px;font-weight:600;color:#1a1c1c"></div>
         <div id="u-email" style="padding:0 11px 7px;font-size:11px;color:#717783;border-bottom:1px solid rgba(192,199,212,.28);margin-bottom:5px"></div>
-        <div id="u-role" style="padding:5px 11px;font-size:12px;color:#404752"></div>
+        <div id="u-role" style="padding:5px 11px 8px;font-size:12px;color:#404752;border-bottom:1px solid rgba(192,199,212,.18);margin-bottom:5px"></div>
+        <button onclick="openChangePassModal()" style="width:100%;background:none;border:none;padding:8px 11px;text-align:left;font-size:13px;color:#1a1c1c;font-weight:500;cursor:pointer;border-radius:8px;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:7px" onmouseover="this.style.background='#f4f3f2'" onmouseout="this.style.background='none'">
+          <span class="ms" style="font-size:16px;color:#005faa">lock</span> Alterar senha
+        </button>
+        <div id="u-invite-btn-wrap">
+          <button onclick="openInviteModal()" style="width:100%;background:none;border:none;padding:8px 11px;text-align:left;font-size:13px;color:#1a1c1c;font-weight:500;cursor:pointer;border-radius:8px;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:7px" onmouseover="this.style.background='#f4f3f2'" onmouseout="this.style.background='none'">
+            <span class="ms" style="font-size:16px;color:#005faa">person_add</span> Convidar usuário
+          </button>
+        </div>
         <button onclick="doLogout()" style="width:100%;background:none;border:none;padding:8px 11px;text-align:left;font-size:13px;color:#ba1a1a;font-weight:600;cursor:pointer;border-radius:8px;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:7px" onmouseover="this.style.background='#ffdad6'" onmouseout="this.style.background='none'">
           <span class="ms" style="font-size:16px">logout</span> Sair
         </button>
@@ -574,6 +582,61 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
   </div>
 </div>
  
+<!-- ══ CHANGE PASSWORD MODAL ══ -->
+<div class="m-overlay" id="chpass-modal" onclick="closeChPassModal(event)">
+  <div class="m-box" onclick="event.stopPropagation()" style="max-width:380px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 class="m-title" style="margin:0">Alterar Senha</h3>
+      <button onclick="closeChPassModal()" class="btn-i"><span class="ms">close</span></button>
+    </div>
+    <div id="chpass-err" style="display:none;background:#ffdad6;color:#ba1a1a;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px"></div>
+    <div id="chpass-ok" style="display:none;background:#d3e3ff;color:#004883;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px"></div>
+    <div style="margin-bottom:11px">
+      <label class="f-label">Nova senha <span style="color:#ba1a1a">*</span></label>
+      <input id="cp-pass1" type="password" class="f-input" placeholder="Mínimo 6 caracteres"/>
+    </div>
+    <div style="margin-bottom:4px">
+      <label class="f-label">Confirmar nova senha <span style="color:#ba1a1a">*</span></label>
+      <input id="cp-pass2" type="password" class="f-input" placeholder="Repita a senha"/>
+    </div>
+    <div class="m-footer">
+      <button class="btn-g" onclick="closeChPassModal()">Cancelar</button>
+      <button class="btn-p" id="cp-submit-btn" onclick="submitChangePass()">
+        <span class="ms" style="font-size:15px">lock</span> Salvar senha
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INVITE USER MODAL ══ -->
+<div class="m-overlay" id="invite-modal" onclick="closeInviteModal(event)">
+  <div class="m-box" onclick="event.stopPropagation()" style="max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 class="m-title" style="margin:0">Convidar Usuário</h3>
+      <button onclick="closeInviteModal()" class="btn-i"><span class="ms">close</span></button>
+    </div>
+    <p style="font-size:13px;color:#404752;margin-bottom:16px;line-height:1.5">
+      O Supabase enviará um e-mail com link de acesso. O usuário clica no link, define a senha e já entra no sistema.
+    </p>
+    <div id="invite-err" style="display:none;background:#ffdad6;color:#ba1a1a;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px"></div>
+    <div id="invite-ok" style="display:none;background:#d3e3ff;color:#004883;padding:10px 13px;border-radius:9px;font-size:13px;margin-bottom:12px"></div>
+    <div style="margin-bottom:11px">
+      <label class="f-label">E-mail <span style="color:#ba1a1a">*</span></label>
+      <input id="inv-email" type="email" class="f-input" placeholder="colaborador@empresa.com" onkeydown="if(event.key==='Enter')submitInvite()"/>
+    </div>
+    <div style="margin-bottom:4px">
+      <label class="f-label">Nome completo</label>
+      <input id="inv-name" type="text" class="f-input" placeholder="Nome do colaborador"/>
+    </div>
+    <div class="m-footer">
+      <button class="btn-g" onclick="closeInviteModal()">Cancelar</button>
+      <button class="btn-p" id="inv-submit-btn" onclick="submitInvite()">
+        <span class="ms" style="font-size:15px">send</span> Enviar convite
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
  
 <!-- ══════════════════════════════════════════
@@ -703,6 +766,115 @@ async function doLogout() {
   S.subs = [];
   await sb.auth.signOut();
 }
+
+// ─────────────────────────────────────────
+//  ALTERAR SENHA
+// ─────────────────────────────────────────
+function openChangePassModal() {
+  ge('u-dd').style.display = 'none';
+  ge('cp-pass1').value = '';
+  ge('cp-pass2').value = '';
+  ge('chpass-err').style.display = 'none';
+  ge('chpass-ok').style.display  = 'none';
+  ge('chpass-modal').classList.add('open');
+  setTimeout(() => ge('cp-pass1').focus(), 80);
+}
+
+function closeChPassModal(e) {
+  if (e && e.target !== ge('chpass-modal')) return;
+  ge('chpass-modal').classList.remove('open');
+}
+
+async function submitChangePass() {
+  const p1 = ge('cp-pass1').value;
+  const p2 = ge('cp-pass2').value;
+  ge('chpass-err').style.display = 'none';
+  ge('chpass-ok').style.display  = 'none';
+
+  if (!p1 || p1.length < 6) {
+    ge('chpass-err').textContent = 'A senha deve ter pelo menos 6 caracteres.';
+    ge('chpass-err').style.display = 'block'; return;
+  }
+  if (p1 !== p2) {
+    ge('chpass-err').textContent = 'As senhas não coincidem.';
+    ge('chpass-err').style.display = 'block'; return;
+  }
+
+  setBtnLoading('cp-submit-btn', true);
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  setBtnLoading('cp-submit-btn', false);
+
+  if (error) {
+    ge('chpass-err').textContent = error.message;
+    ge('chpass-err').style.display = 'block';
+  } else {
+    ge('chpass-ok').textContent = '✓ Senha alterada com sucesso!';
+    ge('chpass-ok').style.display = 'block';
+    setTimeout(() => ge('chpass-modal').classList.remove('open'), 1800);
+  }
+}
+
+// ─────────────────────────────────────────
+//  CONVIDAR USUÁRIO (admin)
+// ─────────────────────────────────────────
+function openInviteModal() {
+  if (S.user.role !== 'admin') { toast('Apenas admins podem convidar usuários.'); return; }
+  ge('u-dd').style.display = 'none';
+  ge('inv-email').value = '';
+  ge('inv-name').value  = '';
+  ge('invite-err').style.display = 'none';
+  ge('invite-ok').style.display  = 'none';
+  ge('invite-modal').classList.add('open');
+  setTimeout(() => ge('inv-email').focus(), 80);
+}
+
+function closeInviteModal(e) {
+  if (e && e.target !== ge('invite-modal')) return;
+  ge('invite-modal').classList.remove('open');
+}
+
+async function submitInvite() {
+  const email = ge('inv-email').value.trim();
+  const name  = ge('inv-name').value.trim();
+  ge('invite-err').style.display = 'none';
+  ge('invite-ok').style.display  = 'none';
+
+  if (!email) {
+    ge('invite-err').textContent = 'Preencha o e-mail.';
+    ge('invite-err').style.display = 'block'; return;
+  }
+
+  setBtnLoading('inv-submit-btn', true);
+
+  // Usa signUp com senha aleatória — o Supabase envia o magic link/invite
+  // O usuário vai receber e-mail para definir a própria senha
+  const tempPass = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password: tempPass,
+    options: {
+      data: { full_name: name || email.split('@')[0] },
+      emailRedirectTo: window.location.origin + window.location.pathname
+    }
+  });
+
+  setBtnLoading('inv-submit-btn', false);
+
+  if (error) {
+    ge('invite-err').textContent = error.message === 'User already registered'
+      ? 'Este e-mail já está cadastrado no sistema.'
+      : error.message;
+    ge('invite-err').style.display = 'block';
+  } else {
+    ge('invite-ok').textContent = `✓ Convite enviado para ${email}! O usuário receberá um e-mail para acessar o sistema.`;
+    ge('invite-ok').style.display = 'block';
+    ge('inv-email').value = '';
+    ge('inv-name').value  = '';
+    // Atualiza lista de usuários
+    const { data: users } = await sb.from('profiles').select('*').order('name');
+    S.users = users || [];
+  }
+}
  
 function authErr(msg) {
   const el = ge('auth-err');
@@ -791,7 +963,13 @@ async function initApp() {
   // Load users list
   const { data: users } = await sb.from('profiles').select('*').order('name');
   S.users = users || [];
- 
+
+  // Esconde botão de convite para não-admins
+  if (u.role !== 'admin') {
+    const wrap = ge('u-invite-btn-wrap');
+    if (wrap) wrap.style.display = 'none';
+  }
+
   // Viewer check
   const isViewer = u.role === 'viewer';
   if (isViewer) {
