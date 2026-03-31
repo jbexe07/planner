@@ -286,7 +286,7 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       <div class="s-item"        id="nav-calendar" onclick="switchView('calendar')"><span class="ms">calendar_month</span>Calendário</div>
       <div class="s-item"        id="nav-tasks"    onclick="switchView('tasks')"><span class="ms">assignment</span>Tarefas</div>
       <div class="s-section" style="padding-right:4px">
-        Departamentos
+        Projetos
         <button onclick="openNewProjectModal()" class="btn-i" style="padding:2px 4px"><span class="ms" style="font-size:16px">add</span></button>
       </div>
       <div id="sb-projects"></div>
@@ -299,8 +299,8 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       <div class="view active" id="view-hub">
         <div class="view-scroll">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
-            <div><h2 style="font-size:21px;font-weight:800">Meus Planos</h2><p style="font-size:13px;color:#717783;margin-top:2px">Gerencie e acompanhe seus projetos.</p></div>
-            <button class="btn-p" onclick="openNewProjectModal()"><span class="ms">add</span>Novo Plano</button>
+            <div><h2 style="font-size:21px;font-weight:800">Departamentos</h2><p style="font-size:13px;color:#717783;margin-top:2px">Gerencie e acompanhe seus departamentos.</p></div>
+            <button class="btn-p" onclick="openNewProjectModal()"><span class="ms">add</span>Novo Depto</button>
           </div>
           <div class="stats-grid" id="hub-stats"></div>
           <div id="hub-projects"></div>
@@ -498,13 +498,15 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
       </div>
     </div>
     <div style="margin-bottom:11px">
-      <label class="f-label">Categoria <span style="color:#ba1a1a">*</span></label>
-      <input id="m-tag" class="f-input" placeholder="ex: Design, Dev, Marketing"/>
+      <label class="f-label">Departamento <span style="color:#ba1a1a">*</span></label>
+      <select id="m-tag" class="f-input" onchange="onTaskDeptChange()">
+        <option value="">Selecione o departamento...</option>
+      </select>
       <div class="f-err" id="m-tag-err">Obrigatório</div>
     </div>
     <div style="margin-bottom:11px">
       <label class="f-label">Responsáveis <span style="color:#ba1a1a">*</span></label>
-      <div class="f-input" style="padding:5px 7px;height:auto"><div id="m-assignees" class="a-list"></div></div>
+      <div class="f-input" style="padding:5px 7px;height:auto;max-height:150px;overflow-y:auto"><div id="m-assignees" class="a-list"></div></div>
       <div class="f-err" id="m-assignees-err">Selecione ao menos um</div>
     </div>
     <div class="f-row" style="margin-bottom:11px">
@@ -519,9 +521,21 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
         <div class="f-err" id="m-due-err">Obrigatório</div>
       </div>
     </div>
-    <div style="margin-bottom:4px">
+    <div style="margin-bottom:11px">
       <label class="f-label">Descrição</label>
       <textarea id="m-desc" class="f-input" rows="3" style="resize:vertical" placeholder="Descrição opcional..."></textarea>
+    </div>
+    <div style="margin-bottom:4px">
+      <label class="f-label">Anexos</label>
+      <div class="upload-zone" id="m-upload-zone" onclick="document.getElementById('m-file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleModalFileDrop(event)" style="padding:10px">
+        <span class="ms" style="font-size:22px;display:block;margin-bottom:3px">cloud_upload</span>
+        Arraste ou clique para anexar arquivos
+      </div>
+      <input type="file" id="m-file-input" multiple style="display:none" onchange="previewModalFiles(this.files)"/>
+      <div id="m-file-preview" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
     <div class="m-footer">
       <button class="btn-g" onclick="closeTaskModal()">Cancelar</button>
@@ -534,28 +548,24 @@ header{background:rgba(250,249,248,.94);backdrop-filter:blur(16px);border-bottom
 <div class="m-overlay" id="proj-modal" onclick="closeProjModal(event)">
   <div class="m-box" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h3 class="m-title" style="margin:0">Novo Projeto</h3>
+      <h3 class="m-title" style="margin:0" id="proj-modal-title">Novo Departamento</h3>
       <button onclick="closeProjModal()" class="btn-i"><span class="ms">close</span></button>
     </div>
     <div style="margin-bottom:11px">
-      <label class="f-label">Nome <span style="color:#ba1a1a">*</span></label>
-      <input id="p-name" class="f-input" placeholder="Nome do projeto"/>
+      <label class="f-label">Nome do Departamento <span style="color:#ba1a1a">*</span></label>
+      <input id="p-name" class="f-input" placeholder="ex: TI, PCP, Estilo, Marketing"/>
       <div class="f-err" id="p-name-err">Obrigatório</div>
     </div>
-    <div class="f-row" style="margin-bottom:11px">
-      <div>
-        <label class="f-label">Categoria <span style="color:#ba1a1a">*</span></label>
-        <input id="p-cat" class="f-input" placeholder="ex: Marketing, Dev"/>
-        <div class="f-err" id="p-cat-err">Obrigatório</div>
-      </div>
-      <div>
-        <label class="f-label">Cor</label>
-        <input id="p-color" type="color" class="f-input" value="#005faa" style="height:40px;cursor:pointer;padding:4px"/>
-      </div>
+    <div style="margin-bottom:11px">
+      <label class="f-label">Cor</label>
+      <input id="p-color" type="color" class="f-input" value="#005faa" style="height:40px;cursor:pointer;padding:4px;width:100%"/>
     </div>
-    <div style="margin-bottom:4px">
-      <label class="f-label">Data de Entrega</label>
-      <input id="p-due" type="date" class="f-input"/>
+    <div style="margin-bottom:11px">
+      <label class="f-label">Membros <span style="color:#ba1a1a">*</span></label>
+      <div class="f-input" style="padding:5px 7px;height:auto;max-height:180px;overflow-y:auto">
+        <div id="p-members" class="a-list"></div>
+      </div>
+      <div class="f-err" id="p-members-err">Selecione ao menos um membro</div>
     </div>
     <div class="m-footer">
       <button class="btn-g" onclick="closeProjModal()">Cancelar</button>
@@ -803,12 +813,20 @@ async function initApp() {
 //  DATA LOADERS
 // ─────────────────────────────────────────
 async function loadProjects() {
-  // Carrega TODOS os projetos da empresa
-  const { data } = await sb.from('projects').select('*').order('created_at', { ascending: false });
-  S.projects = data || [];
+  if (S.user.role === 'admin') {
+    // Admin vê todos os departamentos
+    const { data } = await sb.from('projects').select('*').order('created_at', { ascending: false });
+    S.projects = data || [];
+  } else {
+    // User vê apenas os deptos que é membro
+    const { data: memberships } = await sb.from('project_members')
+      .select('project_id').eq('user_id', S.user.id);
+    const ids = (memberships || []).map(m => m.project_id);
+    if (!ids.length) { S.projects = []; return; }
+    const { data } = await sb.from('projects').select('*').in('id', ids).order('created_at', { ascending: false });
+    S.projects = data || [];
+  }
   if (!S.currentProjId && S.projects.length) S.currentProjId = S.projects[0].id;
-  // Membros são adicionados apenas na criação — não re-adicionar aqui
-  // para evitar ressuscitar projetos excluídos
 }
  
 async function loadTasks() {
@@ -888,7 +906,10 @@ function renderSidebar() {
     <div class="s-item ${S.currentProjId===p.id && S.currentView==='board' ? 'active' : ''}" onclick="openProj('${p.id}')" style="padding-right:4px">
       <div class="proj-dot" style="background:${p.color}"></div>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${esc(p.name)}</span>
-      ${S.user.role === 'admin' ? `<button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#717783;padding:2px 3px;border-radius:5px;opacity:0.4;flex-shrink:0;display:flex;align-items:center" title="Excluir projeto" onmouseover="this.style.opacity=1;this.style.color='#ba1a1a'" onmouseout="this.style.opacity=0.4;this.style.color='#717783'"><span class="ms" style="font-size:14px">delete</span></button>` : ''}
+      ${S.user.role === 'admin' ? `
+        <button onclick="event.stopPropagation();openEditMembersModal('${p.id}')" style="background:none;border:none;cursor:pointer;color:#717783;padding:2px 3px;border-radius:5px;opacity:0.4;flex-shrink:0;display:flex;align-items:center" title="Editar membros" onmouseover="this.style.opacity=1;this.style.color='#005faa'" onmouseout="this.style.opacity=0.4;this.style.color='#717783'"><span class="ms" style="font-size:14px">group</span></button>
+        <button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#717783;padding:2px 3px;border-radius:5px;opacity:0.4;flex-shrink:0;display:flex;align-items:center" title="Excluir departamento" onmouseover="this.style.opacity=1;this.style.color='#ba1a1a'" onmouseout="this.style.opacity=0.4;this.style.color='#717783'"><span class="ms" style="font-size:14px">delete</span></button>
+      ` : ''}
     </div>`).join('');
  
   const sel = ge('tl-proj');
@@ -920,7 +941,7 @@ async function deleteProject(id) {
   S.tasks    = S.tasks.filter(t => t.project_id !== id);
   if (S.currentProjId === id) S.currentProjId = S.projects[0]?.id || null;
   renderSidebar();
-  toast('Projeto excluído.');
+  toast('Departamento excluído.');
   switchView('hub');
 }
 
@@ -951,7 +972,10 @@ function renderHub() {
       <div class="proj-body">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
           <span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:${p.color}18;color:${p.color}">${esc(p.category)}</span>
-          ${S.user.role === 'admin' ? `<button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px 4px;border-radius:7px;display:flex;align-items:center;transition:color .15s" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'" title="Excluir projeto"><span class="ms" style="font-size:16px">delete</span></button>` : ''}
+          ${S.user.role === 'admin' ? `
+            <button onclick="event.stopPropagation();openEditMembersModal('${p.id}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px 4px;border-radius:7px;display:flex;align-items:center;transition:color .15s" onmouseover="this.style.color='#005faa'" onmouseout="this.style.color='#c0c7d4'" title="Editar membros"><span class="ms" style="font-size:16px">group</span></button>
+            <button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px 4px;border-radius:7px;display:flex;align-items:center;transition:color .15s" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'" title="Excluir departamento"><span class="ms" style="font-size:16px">delete</span></button>
+          ` : ''}
         </div>
         <div style="font-size:15px;font-weight:800;margin-bottom:2px">${esc(p.name)}</div>
         <div style="font-size:11px;color:#717783">${pt.length} tarefas · ${pd} concluídas</div>
@@ -1411,17 +1435,74 @@ async function logActivity(taskId, action) {
 // ─────────────────────────────────────────
 //  TASK MODAL
 // ─────────────────────────────────────────
+// Arquivos pendentes no modal de criação
+let _pendingFiles = [];
+
+function onTaskDeptChange() {
+  const deptName = ge('m-tag').value;
+  const dept = S.projects.find(p => p.name.toUpperCase() === deptName);
+  if (!dept) { ge('m-assignees').innerHTML = ''; return; }
+  // Carrega membros do depto selecionado
+  sb.from('project_members').select('user_id').eq('project_id', dept.id).then(({ data }) => {
+    const memberIds = (data || []).map(m => m.user_id);
+    const members = S.users.filter(u => memberIds.includes(u.id));
+    ge('m-assignees').innerHTML = members.map(u => `
+      <label class="a-check">
+        <input type="checkbox" value="${u.id}" ${u.id === S.user.id ? 'checked' : ''}/>
+        <div class="av" style="background:#d3e3ff;color:#004883;width:24px;height:24px;font-size:9px;flex-shrink:0">${u.initials}</div>
+        <span style="flex:1">${esc(u.name)}</span>
+      </label>`).join('');
+  });
+}
+
+function handleModalFileDrop(e) {
+  e.preventDefault();
+  ge('m-upload-zone').classList.remove('drag-over');
+  previewModalFiles(e.dataTransfer.files);
+}
+
+function previewModalFiles(files) {
+  for (const file of files) {
+    if (file.size > 10 * 1024 * 1024) { toast(file.name + ' > 10MB'); continue; }
+    _pendingFiles.push(file);
+  }
+  renderModalFilePreviews();
+}
+
+function renderModalFilePreviews() {
+  ge('m-file-preview').innerHTML = _pendingFiles.map((f, i) => `
+    <div style="display:flex;align-items:center;gap:6px;background:#f4f3f2;border-radius:8px;padding:5px 8px;font-size:12px">
+      <span class="ms" style="font-size:15px;color:#005faa">${f.type.includes('image') ? 'image' : f.type.includes('pdf') ? 'picture_as_pdf' : 'insert_drive_file'}</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px">${esc(f.name)}</span>
+      <button onclick="_pendingFiles.splice(${i},1);renderModalFilePreviews()" style="background:none;border:none;cursor:pointer;color:#c0c7d4" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'"><span class="ms" style="font-size:14px">close</span></button>
+    </div>`).join('');
+}
+
 function openNewTaskModal(defaultStatus) {
   if (S.user.role === 'viewer') { toast('Sem permissão.'); return; }
   ['m-title','m-tag','m-start','m-due','m-assignees'].forEach(id => setErr(id, false));
   ge('m-title').value    = '';
   ge('m-status').value   = defaultStatus || 'todo';
   ge('m-priority').value = 'normal';
-  ge('m-tag').value      = '';
   ge('m-start').value    = '';
   ge('m-due').value      = '';
   ge('m-desc').value     = '';
-  renderAssignees('m-assignees', [S.user.id]);
+  _pendingFiles = [];
+  renderModalFilePreviews();
+
+  // Preenche select de departamentos com os visíveis ao usuário
+  const deptSel = ge('m-tag');
+  deptSel.innerHTML = '<option value="">Selecione o departamento...</option>' +
+    S.projects.map(p => `<option value="${p.name.toUpperCase()}">${p.name}</option>`).join('');
+
+  // Se só tem um depto, já seleciona e filtra responsáveis
+  if (S.projects.length === 1) {
+    deptSel.value = S.projects[0].name.toUpperCase();
+    onTaskDeptChange();
+  } else {
+    ge('m-assignees').innerHTML = '<p style="font-size:12px;color:#717783;padding:4px">Selecione o departamento primeiro</p>';
+  }
+
   ge('task-modal').classList.add('open');
   setTimeout(() => ge('m-title').focus(), 80);
 }
@@ -1463,6 +1544,23 @@ async function submitTask() {
   if (assignees.length) {
     await sb.from('task_assignees').insert(assignees.map(uid => ({ task_id: task.id, user_id: uid })));
   }
+
+  // Upload de arquivos pendentes
+  for (const file of _pendingFiles) {
+    try {
+      const path = `${task.id}/${Date.now()}_${file.name}`;
+      const { error: upErr } = await sb.storage.from('attachments').upload(path, file);
+      if (!upErr) {
+        const { data: { publicUrl } } = sb.storage.from('attachments').getPublicUrl(path);
+        await sb.from('attachments').insert({
+          task_id: task.id, name: file.name, storage_path: path,
+          url: publicUrl, mime_type: file.type, uploaded_by: S.user.id
+        });
+      }
+    } catch(e) { console.warn('Upload error:', e); }
+  }
+  _pendingFiles = [];
+
   await logActivity(task.id, 'criou a tarefa');
   await reload('tasks');
   setBtnLoading('m-submit-btn', false);
@@ -1474,14 +1572,43 @@ async function submitTask() {
 //  PROJECT MODAL
 // ─────────────────────────────────────────
 function openNewProjectModal() {
-  if (S.user.role !== 'admin') { toast('Apenas admins podem criar projetos.'); return; }
-  ['p-name','p-cat'].forEach(id => setErr(id, false));
-  ge('p-name').value  = '';
-  ge('p-cat').value   = '';
-  ge('p-due').value   = '';
-  ge('p-color').value = '#005faa';
+  if (S.user.role !== 'admin') { toast('Apenas admins podem criar departamentos.'); return; }
+  ['p-name','p-members'].forEach(id => setErr(id, false));
+  ge('p-name').value   = '';
+  ge('p-color').value  = '#005faa';
+  ge('proj-modal-title').textContent = 'Novo Departamento';
+  // Renderiza checkbox de todos os usuários
+  ge('p-members').innerHTML = S.users.map(u => `
+    <label class="a-check">
+      <input type="checkbox" value="${u.id}" checked/>
+      <div class="av" style="background:#d3e3ff;color:#004883;width:24px;height:24px;font-size:9px;flex-shrink:0">${u.initials}</div>
+      <span style="flex:1">${esc(u.name)}</span>
+    </label>`).join('');
   ge('proj-modal').classList.add('open');
   setTimeout(() => ge('p-name').focus(), 80);
+}
+
+function openEditMembersModal(projId) {
+  if (S.user.role !== 'admin') { toast('Apenas admins podem editar membros.'); return; }
+  const proj = S.projects.find(p => p.id === projId);
+  if (!proj) return;
+  // Reutiliza o mesmo modal em modo edição
+  ge('proj-modal-title').textContent = `Membros — ${proj.name}`;
+  ge('p-name').value  = proj.name;
+  ge('p-color').value = proj.color;
+  setErr('p-name', false); setErr('p-members', false);
+  // Carrega membros atuais
+  sb.from('project_members').select('user_id').eq('project_id', projId).then(({ data }) => {
+    const currentMembers = new Set((data || []).map(m => m.user_id));
+    ge('p-members').innerHTML = S.users.map(u => `
+      <label class="a-check">
+        <input type="checkbox" value="${u.id}" ${currentMembers.has(u.id) ? 'checked' : ''}/>
+        <div class="av" style="background:#d3e3ff;color:#004883;width:24px;height:24px;font-size:9px;flex-shrink:0">${u.initials}</div>
+        <span style="flex:1">${u.name}</span>
+      </label>`).join('');
+    ge('proj-modal').dataset.editId = projId;
+    ge('proj-modal').classList.add('open');
+  });
 }
  
 function closeProjModal(e) {
@@ -1490,33 +1617,50 @@ function closeProjModal(e) {
 }
  
 async function submitProject() {
-  if (S.user.role !== 'admin') { toast('Apenas admins podem criar projetos.'); closeProjModal(); return; }
-  const name = ge('p-name').value.trim();
-  const cat  = ge('p-cat').value.trim();
+  if (S.user.role !== 'admin') { toast('Apenas admins podem criar departamentos.'); closeProjModal(); return; }
+  const name    = ge('p-name').value.trim();
+  const members = [...document.querySelectorAll('#p-members input:checked')].map(el => el.value);
   let ok = true;
-  setErr('p-name', !name); if (!name) ok = false;
-  setErr('p-cat',  !cat);  if (!cat) ok = false;
+  setErr('p-name',    !name);          if (!name) ok = false;
+  setErr('p-members', !members.length); if (!members.length) ok = false;
   if (!ok) return;
- 
+
+  const editId = ge('proj-modal').dataset.editId;
   setBtnLoading('p-submit-btn', true);
+
+  if (editId) {
+    // Modo edição de membros
+    await sb.from('projects').update({ name, color: ge('p-color').value }).eq('id', editId);
+    await sb.from('project_members').delete().eq('project_id', editId);
+    await sb.from('project_members').insert(members.map(uid => ({ project_id: editId, user_id: uid })));
+    delete ge('proj-modal').dataset.editId;
+    await loadProjects(); await loadTasks(); renderSidebar();
+    setBtnLoading('p-submit-btn', false);
+    ge('proj-modal').classList.remove('open');
+    toast('Departamento atualizado!');
+    refreshView();
+    return;
+  }
+
+  // Modo criação
   const { data: proj, error } = await sb.from('projects').insert({
-    name, category: cat.toUpperCase(),
+    name, category: name.toUpperCase(),
     color: ge('p-color').value,
-    due_date: ge('p-due').value || null,
     owner_id: S.user.id,
   }).select().single();
- 
+
   if (error || !proj) { toast('Erro: ' + (error?.message||'?')); setBtnLoading('p-submit-btn', false); return; }
- 
-  // Add creator as member
-  await sb.from('project_members').insert({ project_id: proj.id, user_id: S.user.id });
+
+  // Adiciona membros selecionados + admin criador
+  const allMembers = [...new Set([...members, S.user.id])];
+  await sb.from('project_members').insert(allMembers.map(uid => ({ project_id: proj.id, user_id: uid })));
   await loadProjects();
   S.currentProjId = proj.id;
   await loadTasks();
   renderSidebar();
   setBtnLoading('p-submit-btn', false);
   ge('proj-modal').classList.remove('open');
-  toast('Projeto criado!');
+  toast('Departamento criado!');
   switchView('board');
 }
  
