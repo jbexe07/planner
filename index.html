@@ -803,22 +803,12 @@ async function initApp() {
 //  DATA LOADERS
 // ─────────────────────────────────────────
 async function loadProjects() {
-  // Carrega TODOS os projetos (planner compartilhado da empresa)
+  // Carrega TODOS os projetos da empresa
   const { data } = await sb.from('projects').select('*').order('created_at', { ascending: false });
   S.projects = data || [];
   if (!S.currentProjId && S.projects.length) S.currentProjId = S.projects[0].id;
-
-  // Garante que o usuário atual é membro de todos os projetos
-  if (S.projects.length) {
-    const { data: memberships } = await sb.from('project_members')
-      .select('project_id').eq('user_id', S.user.id);
-    const memberOf = new Set((memberships || []).map(m => m.project_id));
-    const missing = S.projects.filter(p => !memberOf.has(p.id))
-      .map(p => ({ project_id: p.id, user_id: S.user.id }));
-    if (missing.length) {
-      await sb.from('project_members').upsert(missing, { onConflict: 'project_id,user_id' });
-    }
-  }
+  // Membros são adicionados apenas na criação — não re-adicionar aqui
+  // para evitar ressuscitar projetos excluídos
 }
  
 async function loadTasks() {
@@ -898,9 +888,7 @@ function renderSidebar() {
     <div class="s-item ${S.currentProjId===p.id && S.currentView==='board' ? 'active' : ''}" onclick="openProj('${p.id}')" style="padding-right:4px">
       <div class="proj-dot" style="background:${p.color}"></div>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${esc(p.name)}</span>
-      <button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#717783;padding:2px 3px;border-radius:5px;opacity:0.4;flex-shrink:0;display:flex;align-items:center" title="Excluir projeto" onmouseover="this.style.opacity=1;this.style.color='#ba1a1a'" onmouseout="this.style.opacity=0.4;this.style.color='#717783'">
-        <span class="ms" style="font-size:14px">delete</span>
-      </button>
+      ${S.user.role === 'admin' ? `<button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#717783;padding:2px 3px;border-radius:5px;opacity:0.4;flex-shrink:0;display:flex;align-items:center" title="Excluir projeto" onmouseover="this.style.opacity=1;this.style.color='#ba1a1a'" onmouseout="this.style.opacity=0.4;this.style.color='#717783'"><span class="ms" style="font-size:14px">delete</span></button>` : ''}
     </div>`).join('');
  
   const sel = ge('tl-proj');
@@ -912,6 +900,7 @@ function renderSidebar() {
 }
  
 async function deleteProject(id) {
+  if (S.user.role !== 'admin') { toast('Apenas admins podem excluir projetos.'); return; }
   const proj = S.projects.find(p => p.id === id);
   if (!proj) return;
   if (!confirm(`Excluir o projeto "${proj.name}" e todas as suas tarefas? Essa ação não pode ser desfeita.`)) return;
@@ -962,9 +951,7 @@ function renderHub() {
       <div class="proj-body">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
           <span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:${p.color}18;color:${p.color}">${esc(p.category)}</span>
-          <button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px 4px;border-radius:7px;display:flex;align-items:center;transition:color .15s" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'" title="Excluir projeto">
-            <span class="ms" style="font-size:16px">delete</span>
-          </button>
+          ${S.user.role === 'admin' ? `<button onclick="event.stopPropagation();deleteProject('${p.id}')" style="background:none;border:none;cursor:pointer;color:#c0c7d4;padding:2px 4px;border-radius:7px;display:flex;align-items:center;transition:color .15s" onmouseover="this.style.color='#ba1a1a'" onmouseout="this.style.color='#c0c7d4'" title="Excluir projeto"><span class="ms" style="font-size:16px">delete</span></button>` : ''}
         </div>
         <div style="font-size:15px;font-weight:800;margin-bottom:2px">${esc(p.name)}</div>
         <div style="font-size:11px;color:#717783">${pt.length} tarefas · ${pd} concluídas</div>
@@ -1264,15 +1251,27 @@ async function saveTask() {
   ge('detail-panel').classList.remove('open');
 }
  
+function canDeleteTask(task) {
+  if (!task) return false;
+  if (S.user.role === 'admin') return true;
+  if (task.created_by === S.user.id) return true;
+  if ((task.assignees || []).includes(S.user.id)) return true;
+  return false;
+}
+
 async function deleteTask() {
+  const task = S.tasks.find(t => t.id === S.currentTaskId);
+  if (!canDeleteTask(task)) { toast('Sem permissão para excluir esta tarefa.'); return; }
   if (!confirm('Excluir esta tarefa permanentemente?')) return;
   await sb.from('tasks').delete().eq('id', S.currentTaskId);
   ge('detail-panel').classList.remove('open');
   toast('Tarefa excluída.');
   await reload('tasks');
 }
- 
+
 function confirmDel(id) {
+  const task = S.tasks.find(t => t.id === id);
+  if (!canDeleteTask(task)) { toast('Sem permissão para excluir esta tarefa.'); return; }
   if (!confirm('Excluir esta tarefa?')) return;
   sb.from('tasks').delete().eq('id', id).then(() => { toast('Tarefa excluída.'); reload('tasks'); });
 }
@@ -1475,7 +1474,7 @@ async function submitTask() {
 //  PROJECT MODAL
 // ─────────────────────────────────────────
 function openNewProjectModal() {
-  if (S.user.role === 'viewer') { toast('Sem permissão.'); return; }
+  if (S.user.role !== 'admin') { toast('Apenas admins podem criar projetos.'); return; }
   ['p-name','p-cat'].forEach(id => setErr(id, false));
   ge('p-name').value  = '';
   ge('p-cat').value   = '';
@@ -1491,6 +1490,7 @@ function closeProjModal(e) {
 }
  
 async function submitProject() {
+  if (S.user.role !== 'admin') { toast('Apenas admins podem criar projetos.'); closeProjModal(); return; }
   const name = ge('p-name').value.trim();
   const cat  = ge('p-cat').value.trim();
   let ok = true;
