@@ -849,6 +849,11 @@ async function submitInvite() {
     ge('invite-err').style.display = 'block'; return;
   }
 
+  if (!email.endsWith("@serafine.com.br")) {
+    ge("invite-err").textContent = "Você só pode convidar e-mails @serafine.com.br";
+    ge("invite-err").style.display = "block";return;
+  }
+
   setBtnLoading('inv-submit-btn', true);
 
   // Usa signUp com senha aleatória — o Supabase envia o magic link/invite
