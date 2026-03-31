@@ -718,11 +718,6 @@ async function doRegister() {
   if (!pass || pass.length < 6) { authErr('A senha deve ter pelo menos 6 caracteres.'); return; }
   if (pass !== pass2) { authErr('As senhas não coincidem.'); return; }
 
-  if (!email.endsWith9"@serafine.com.br")) {
-    authErr("Apenas e-mails institucionas (@serafine.com.br) são permitidos.");
-    return;
-  }
-
   setBtnLoading('auth-btn', true);
   const { data, error } = await sb.auth.signUp({
     email, password: pass,
@@ -847,11 +842,6 @@ async function submitInvite() {
   if (!email) {
     ge('invite-err').textContent = 'Preencha o e-mail.';
     ge('invite-err').style.display = 'block'; return;
-  }
-
-  if (!email.endsWith("@serafine.com.br")) {
-    ge("invite-err").textContent = "Você só pode convidar e-mails @serafine.com.br";
-    ge("invite-err").style.display = "block";return;
   }
 
   setBtnLoading('inv-submit-btn', true);
