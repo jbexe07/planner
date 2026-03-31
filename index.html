@@ -728,11 +728,6 @@ async function handleAuthChange(event, session) {
   // Se já iniciou com este usuário, ignora
   if (_appInited && S.user?.id === session.user.id) return;
 
-  // Limpa token da URL
-  if (window.location.hash || window.location.search.includes('access_token')) {
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-
   // Busca ou cria perfil
   let { data: prof } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
   if (!prof) {
@@ -801,21 +796,29 @@ async function initApp() {
 //  DATA LOADERS
 // ─────────────────────────────────────────
 async function loadProjects() {
-  // Get projects where user is member
-  const { data: memberships } = await sb.from('project_members')
-    .select('project_id').eq('user_id', S.user.id);
-  if (!memberships?.length) { S.projects = []; return; }
-  const ids = memberships.map(m => m.project_id);
-  const { data } = await sb.from('projects').select('*').in('id', ids).order('created_at', { ascending: false });
+  // Carrega TODOS os projetos (planner compartilhado da empresa)
+  const { data } = await sb.from('projects').select('*').order('created_at', { ascending: false });
   S.projects = data || [];
-  // Default project
   if (!S.currentProjId && S.projects.length) S.currentProjId = S.projects[0].id;
+
+  // Garante que o usuário atual é membro de todos os projetos
+  if (S.projects.length) {
+    const { data: memberships } = await sb.from('project_members')
+      .select('project_id').eq('user_id', S.user.id);
+    const memberOf = new Set((memberships || []).map(m => m.project_id));
+    const missing = S.projects.filter(p => !memberOf.has(p.id))
+      .map(p => ({ project_id: p.id, user_id: S.user.id }));
+    if (missing.length) {
+      await sb.from('project_members').upsert(missing, { onConflict: 'project_id,user_id' });
+    }
+  }
 }
  
 async function loadTasks() {
   if (!S.projects.length) { S.tasks = []; return; }
   const projIds = S.projects.map(p => p.id);
-  const { data: tasks } = await sb.from('tasks').select('*').in('project_id', projIds).order('created_at', { ascending: false });
+  const { data: tasks } = await sb.from('tasks').select('*')
+    .in('project_id', projIds).order('created_at', { ascending: false });
   if (!tasks?.length) { S.tasks = []; return; }
   const taskIds = tasks.map(t => t.id);
   // Assignees
