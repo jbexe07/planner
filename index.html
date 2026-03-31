@@ -678,7 +678,10 @@ async function doRegister() {
 async function loginGoogle() {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: location.href }
+    options: {
+      redirectTo: location.origin + location.pathname,
+      queryParams: { prompt: 'select_account' }
+    }
   });
   if (error) authErr(error.message);
 }
@@ -765,6 +768,10 @@ async function handleAuthChange(event, session) {
 async function initApp() {
   if (_appInited) return;
   _appInited = true;
+  // Limpa token da URL aqui, após Supabase já ter processado
+  if (window.location.hash && window.location.hash.includes('access_token')) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
   const u = S.user;
   ge('u-av').textContent = u.initials;
   ge('u-name').textContent = u.name;
