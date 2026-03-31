@@ -890,6 +890,7 @@ function switchView(v) {
   ge('view-' + v).classList.add('active');
   ge('nav-' + v)?.classList.add('active');
   S.currentView = v;
+  renderSidebar();
   if (v === 'hub')      renderHub();
   if (v === 'board')    renderBoard();
   if (v === 'calendar') renderCalendar();
